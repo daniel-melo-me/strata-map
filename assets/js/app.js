@@ -102,7 +102,7 @@ function intro(){
     <li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-run)" stroke-width="3" stroke-dasharray="2 5"/></svg>Onde roda: liga o código ao metal</li>
    </ul>
    <h4>Quanto mais fundo, mais longe do usuário</h4>
-   <p>O número de cada faixa é a profundidade. A camada 1 é o que a pessoa vê. A 9 é luz, eletricidade e ondas.</p></div>`;
+   <p>O número de cada faixa é a profundidade. A camada 1 é o que a pessoa vê. A 9 é o meio físico: luz na fibra, eletricidade no cobre e ondas no ar.</p></div>`;
 }
 function setHash(id){
   try{history.replaceState(null,"",id?"#"+id:location.pathname+location.search);}catch(_){}

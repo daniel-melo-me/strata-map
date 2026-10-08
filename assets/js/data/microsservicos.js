@@ -303,4 +303,91 @@ satelite:{l:"fis",n:"Satélite",t:"Internet vinda do espaço",
  ["gateway","navegador","A resposta volta pelo mesmo caminho: borda, fibra, provedor, Wi-Fi. Cifrada o tempo todo.",40],
  ["navegador","usuario","O front-end desenha a lista na tela. Do toque até aqui, cerca de 200 milissegundos.",16]
  ],
+
+ /* Modo falha.
+  * deps:   [dependente, dependência, efeito, motivo]. Quem precisa de quem, não o caminho da requisição.
+  *         para    = sem a dependência, o dependente deixa de funcionar
+  *         degrada = continua funcionando, pior
+  *         fila    = a dependência é a fila: se ela cai, o dependente fica sem eventos;
+  *                   se o dependente cai, a fila guarda o que não foi entregue
+  *         muda    = só mudanças param (deploy, escala, infra); o que já roda continua
+  * guards: com redundância ligada, quem segura a queda da peça: [peça que absorve ou null, texto, efeito nos dependentes]
+  *         efeito "nada" = ninguém percebe; "degrada" = interrupção curta ou lentidão
+  */
+ failure:{
+  deps:[
+   ["usuario","dispositivo","para","sem o aparelho, não há como usar o sistema"],
+   ["usuario","navegador","para","é pelo navegador ou app que a pessoa usa o sistema"],
+   ["navegador","dispositivo","para","o navegador roda no aparelho"],
+   ["navegador","frontend","para","sem o código da interface, a tela fica branca"],
+   ["navegador","cdn","para","os arquivos da tela vêm da CDN"],
+   ["navegador","dns","para","sem DNS, o navegador não acha o endereço do sistema"],
+   ["navegador","tls","para","com o certificado inválido, o navegador bloqueia o acesso"],
+   ["navegador","provedor","para","sem provedor, não há internet"],
+   ["navegador","roteador","degrada","sem Wi-Fi, sobra o 4G e 5G ou o cabo"],
+   ["navegador","radio","degrada","sem sinal sem fio, só quem está no cabo continua"],
+   ["navegador","waf","para","bloqueadas no WAF, as requisições não chegam à nuvem"],
+   ["navegador","lb","para","sem balanceador, as requisições não chegam aos serviços"],
+   ["navegador","gateway","para","todas as APIs passam pelo gateway"],
+   ["navegador","bff","para","a tela pede os dados ao BFF"],
+   ["provedor","fibra","para","o backbone do provedor é de fibra"],
+   ["provedor","cobre","degrada","quem chega pelo cobre (DSL, cabo coaxial) fica sem internet"],
+   ["provedor","satelite","degrada","quem depende de satélite, como zonas rurais, fica sem internet"],
+   ["gateway","idp","degrada","novos logins falham; quem já entrou segue até o token expirar"],
+   ["bff","pedidos","degrada","a tela de pedidos falha, o resto funciona"],
+   ["bff","pagamentos","degrada","não dá para pagar, mas dá para navegar"],
+   ["pedidos","oltp","para","sem banco, não lê nem grava pedidos"],
+   ["pedidos","cache","degrada","sem cache, cada leitura vai ao banco e tudo fica mais lento"],
+   ["pedidos","kafka","degrada","o pedido é gravado, mas o evento não sai (com outbox, sai depois)"],
+   ["pagamentos","oltp","para","sem banco, não registra pagamentos"],
+   ["pagamentos","externas","para","sem o adquirente, nenhum cartão é autorizado"],
+   ["pagamentos","kafka","fila","não recebe os eventos de pedido criado"],
+   ["notificacoes","kafka","fila","sem eventos, nenhum aviso é disparado"],
+   ["notificacoes","externas","para","sem o provedor de e-mail e SMS, nenhum aviso sai"],
+   ["notificacoes","nosql","degrada","perde o histórico de avisos enviados"],
+   ["worker","kafka","fila","sem eventos, as rotinas não começam"],
+   ["worker","oltp","para","as rotinas leem e gravam no banco"],
+   ["busca","kafka","fila","o índice para de ser atualizado e a busca mostra dados velhos"],
+   ["lake","oltp","fila","as mudanças param de chegar e os relatórios desatualizam"],
+   ["pedidos","container","para","o serviço roda dentro de um container"],
+   ["pagamentos","container","para","o serviço roda dentro de um container"],
+   ["notificacoes","container","para","o serviço roda dentro de um container"],
+   ["bff","container","para","o serviço roda dentro de um container"],
+   ["worker","container","para","o serviço roda dentro de um container"],
+   ["container","cicd","muda","nenhuma imagem nova é publicada; o que roda continua"],
+   ["container","pod","para","o container roda dentro de um pod"],
+   ["pod","mesh","para","o tráfego entre serviços passa pelos sidecars do mesh"],
+   ["pod","k8s","muda","os pods seguem rodando, mas sem autocura, escala nem deploy"],
+   ["pod","vm","para","o pod roda numa máquina virtual, o nó do cluster"],
+   ["k8s","iac","muda","o cluster segue rodando; só não dá para mudar nem recriar a infraestrutura"],
+   ["vpc","iac","muda","a rede segue funcionando; só não dá para mudar nem recriar"],
+   ["vm","vpc","para","sem rede virtual, as máquinas ficam isoladas"],
+   ["vm","servidor","para","a VM é uma fatia de um servidor físico"],
+   ["vm","regiao","para","as máquinas ficam numa região da nuvem"],
+   ["oltp","storage","para","sem disco, o banco para"],
+   ["storage","servidor","para","os discos ficam em servidores físicos"],
+   ["servidor","datacenter","para","o servidor fica num data center"],
+   ["regiao","datacenter","para","cada zona da região é um ou mais data centers"],
+   ["oltp","regiao","para","o banco gerenciado fica na região"],
+   ["cache","regiao","para","o cache gerenciado fica na região"],
+   ["nosql","regiao","para","o banco gerenciado fica na região"],
+   ["busca","regiao","para","o motor de busca fica na região"],
+   ["kafka","regiao","para","o barramento fica na região"],
+   ["lake","regiao","para","o data lake fica na região"],
+   ["lb","regiao","para","o balanceador fica na região"],
+   ["gateway","regiao","para","o gateway fica na região"]
+  ],
+  guards:{
+   fibra:["provedor","O provedor desvia o tráfego por outra rota, mais longa: fica um pouco mais lento.","degrada"],
+   lb:[null,"Balanceadores trabalham em par: se um cai, o outro assume.","nada"],
+   externas:["pagamentos","Circuit breaker e fila de retentativa: os pagamentos ficam pendentes e são tentados de novo quando o parceiro volta.","degrada"],
+   oltp:[null,"A réplica em outra zona é promovida a principal. As escritas falham por alguns segundos e voltam.","degrada"],
+   container:["k8s","O rollout da imagem quebrada para: o Kubernetes mantém a versão anterior no ar até a nova ficar pronta.","nada"],
+   pod:["k8s","As outras réplicas atendem enquanto o Kubernetes sobe um pod novo.","nada"],
+   vm:["k8s","O Kubernetes reagenda os pods em outros nós.","nada"],
+   servidor:[null,"O provedor de nuvem move as VMs para outro servidor.","nada"],
+   datacenter:["regiao","Multi-AZ: as outras zonas da região assumem o tráfego.","nada"],
+   regiao:[null,"Multi-AZ: a queda de uma zona é absorvida pelas outras. Perder a região inteira exige um plano de recuperação em outra região.","nada"]
+  }
+ }
 };

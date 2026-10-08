@@ -35,24 +35,26 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `assets/css/styles.css`: estilos, temas claro e escuro.
 - `assets/js/data/base.js`: camadas, personas e eixos, comuns a todos os estilos.
 - `assets/js/data/microsservicos.js`: peças, conexões e jornada do estilo microsserviços.
-- `assets/js/app.js`: render do mapa, painel, filtros e jornada.
+- `assets/js/failure.js`: cálculo da cascata do modo falha (função pura, testável no Node).
+- `assets/js/app.js`: render do mapa, painel, filtros, jornada e modo falha.
 
 - 9 camadas: Experiência, Rede e internet, Borda do sistema, Aplicação, Integração e eventos, Dados, Plataforma, Infraestrutura, Físico.
 - 41 peças. Cada uma abre um painel com: o que é, por dentro, tecnologias reais, onde pode rodar, quem cuida, se cair, eixos transversais e conexões.
 - "Disparar um clique": 24 passos narrados com contador de milissegundos (~200 ms no total).
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
+- Modo falha: derrubar uma peça mostra quem para, degrada, congela ou segura o tranco, e se o usuário percebe. Chave "Com redundância" (ligada = produção real; desligada = cascata inteira). Link direto `#falha-<id>`.
 - Pacotes ambientes circulando nas conexões; respeita `prefers-reduced-motion`; tema claro e escuro.
 - Tipografia: Bricolage Grotesque (títulos), Source Sans 3 (corpo) e JetBrains Mono (rótulos técnicos, números de camada, milissegundos). Faixas escurecem conforme a profundidade, como um corte de terreno.
 - Tela inicial: hero com o "testemunho" (as 9 camadas em miniatura, clicáveis, com um pacote descendo) e barra de controles fixa no topo; as personas ficam num seletor.
 
-Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra `STRATA.styles.<nome>` com `nodes` (peças), `edges` (conexões: tipos net, sync, async, run) e `journey`. Para um novo estilo, crie um arquivo em `assets/js/data/` seguindo `microsservicos.js`.
+Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra `STRATA.styles.<nome>` com `nodes` (peças), `edges` (conexões: tipos net, sync, async, run) e `journey`. O modo falha usa `failure`: `deps` diz quem precisa de quem (efeitos para, degrada, fila, muda), separado de `edges`, que é o caminho da requisição; `guards` diz quem segura cada queda quando há redundância. Para um novo estilo, crie um arquivo em `assets/js/data/` seguindo `microsservicos.js`.
 
 ## Próximos passos levantados
 
 - Outros estilos arquiteturais: event-driven, hexagonal, serverless, monólito.
 - Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça.
 - Validação de conformidade (adiada): requisitos por arquitetura com peso (inegociáveis, estruturais, operação), gerando score de aptidão e lista de lacunas.
-- Linha do tempo da evolução das arquiteturas, custo e trade-off por peça, modo falha.
+- Linha do tempo da evolução das arquiteturas, custo e trade-off por peça.
 - Eixo de processo ágil (discovery, refinamento, sprint, review, retro).
 
 ## Como trabalhar comigo

@@ -53,6 +53,12 @@ Ao tocar em qualquer componente, você vê:
 
 Acompanhe uma requisição real atravessando todas as camadas, em 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo, chegando a cerca de **200 milissegundos**.
 
+### ⚡ Modo falha
+
+Derrube qualquer peça e veja a cascata: quem para junto, quem só degrada, quem congela (o que roda continua, só as mudanças param) e quem segura o tranco, como a fila que guarda os eventos até o consumidor voltar. No fim, o veredito: o usuário percebe ou não?
+
+A chave **Com redundância** mostra a produção real, com réplicas, failover e várias zonas. Desligada, mostra a cascata inteira e por que a redundância existe. Cada cenário tem link direto: `#falha-oltp` abre o mapa com o banco relacional derrubado.
+
 ### 🧪 Eixos que atravessam tudo
 
 Acenda as peças por onde passa cada preocupação transversal:
@@ -113,10 +119,11 @@ index.html                     estrutura da página
 assets/css/styles.css          estilos, temas claro e escuro
 assets/js/data/base.js         camadas, personas e eixos (comuns a todos os estilos)
 assets/js/data/microsservicos.js  peças, conexões e jornada do estilo microsserviços
-assets/js/app.js               render do mapa, painel, filtros e jornada
+assets/js/failure.js           cálculo da cascata do modo falha
+assets/js/app.js               render do mapa, painel, filtros, jornada e modo falha
 ```
 
-Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges` e `journey`, seguindo o formato de `microsservicos.js`.
+Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges`, `journey` e `failure` (dependências e redundâncias do modo falha), seguindo o formato de `microsservicos.js`.
 
 ---
 
@@ -127,7 +134,7 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 - [ ] Validação de conformidade: checar se uma aplicação está apta a uma arquitetura
 - [ ] Linha do tempo: como as arquiteturas evoluíram, e por quê
 - [ ] Custo e trade-off por componente
-- [ ] Modo falha: simular a queda de uma peça e ver o impacto
+- [x] Modo falha: simular a queda de uma peça e ver o impacto
 
 ---
 

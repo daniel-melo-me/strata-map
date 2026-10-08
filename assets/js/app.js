@@ -1,4 +1,4 @@
-/* Strata Map: render do mapa, painel de detalhes, eixos, personas e jornada.
+/* Strata Map: render do mapa, painel de detalhes, eixos, personas, jornada e modo falha.
  * Os dados vêm de assets/js/data/ (window.STRATA). */
 (function(){
 const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
@@ -64,8 +64,8 @@ LAYERS.forEach((L,i)=>{
   Object.entries(N).filter(([,v])=>v.l===L.id).forEach(([id,v])=>{
     const b=document.createElement("button"); b.className="node"; b.dataset.id=id;
     Object.keys(v.ax||{}).forEach(k=>b.classList.add("ax-"+k));
-    b.innerHTML=`<i class="ax-dot"></i><b>${v.n}</b><span>${v.t}</span>`;
-    b.addEventListener("click",()=>state.sel===id?closePanel():select(id));
+    b.innerHTML=`<i class="ax-dot"></i><i class="f-badge"></i><b>${v.n}</b><span>${v.t}</span>`;
+    b.addEventListener("click",()=>fail.on?breakNode(id):state.sel===id?closePanel():select(id));
     nodes.appendChild(b); el[id]=b;
   });
   map.appendChild(sec);
@@ -166,9 +166,11 @@ function select(id){
    ${v.host?`<h4>Onde pode rodar</h4><p>${v.host}</p>`:""}
    <h4>Quem cuida</h4><div class="row who">${(v.who||[]).map(p=>`<button class="chip" data-persona="${p}" aria-pressed="${state.persona===p}">${PERSONAS[p][0]}</button>`).join("")}</div>
    <h4>Se cair</h4><div class="fail">${v.fail}</div>
+   ${STYLE.failure?`<button class="btn-break" data-break>${ICON_BOLT}Derrubar esta peça e ver a cascata</button>`:""}
    ${axn?`<h4>Eixos que passam por aqui</h4>${axn}`:""}
    ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}`;
   panel.querySelector(".close").onclick=closePanel;
+  const brk=panel.querySelector("[data-break]"); if(brk) brk.onclick=()=>breakNode(id);
   panel.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>goTo(b.dataset.go));
   panel.querySelectorAll("[data-persona]").forEach(b=>b.onclick=()=>setPersona(state.persona===b.dataset.persona?null:b.dataset.persona));
   panel.scrollTop=0;
@@ -184,6 +186,7 @@ const psel=document.getElementById("personas"), pline=document.getElementById("p
 Object.entries(PERSONAS).forEach(([k,v])=>psel.add(new Option(v[0],k)));
 psel.onchange=()=>setPersona(psel.value||null);
 function setPersona(k){
+  if(k&&fail.on) exitFail();
   state.persona=k; psel.value=k||"";
   psel.closest(".select").classList.toggle("on",!!k);
   document.querySelectorAll("#panel [data-persona]").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.persona===k)));
@@ -194,6 +197,7 @@ function setPersona(k){
 }
 const banner=document.getElementById("banner");
 document.querySelectorAll("#axes .chip").forEach(b=>b.onclick=()=>{
+  if(fail.on) exitFail();
   const k=b.dataset.ax; state.ax=state.ax===k?null:k;
   document.querySelectorAll("#axes .chip").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.ax===state.ax)));
   if(state.ax){banner.innerHTML=`<b>${AX[k][0]}.</b> ${AX[k][1]}`;banner.classList.add("on");} else banner.classList.remove("on");
@@ -228,7 +232,7 @@ function send(a,b,color,dur,r){
 /* ambient life */
 const COLORS={net:"var(--w-net)",sync:"var(--w-sync)",async:"var(--w-async)",run:"var(--w-run)"};
 function ambient(){
-  if(reduce||jr.on||document.hidden) return;
+  if(reduce||jr.on||fail.on||document.hidden) return;
   const pool=E.filter(e=>e[2]!=="run"||state.runs);
   const e=pool[Math.floor(Math.random()*pool.length)];
   const rev=e[2]!=="async"&&Math.random()<.4;
@@ -259,6 +263,7 @@ function showStep(i){
   });},reduce?0:450);
 }
 function startJourney(){
+  if(fail.on) exitFail();
   if(state.sel) closePanel();
   clearFocus(); jr.on=true; setPaused(false); narr.classList.add("on"); showStep(0);
 }
@@ -275,12 +280,117 @@ nPause.onclick=()=>{
     if(jr.i<LAST) showStep(jr.i+1); else finish();
   }else{setPaused(true); clearTimers();}
 };
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(jr.on)stopJourney();else if(state.sel)closePanel();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
 
-/* ---------- deep link: #id abre a peça ---------- */
+/* ---------- modo falha ---------- */
+const ICON_BOLT=`<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2 1 3 8h3.6L5.8 13 11 6H7.4z" fill="currentColor"/></svg>`;
+const F_LABEL={down:"caiu",stop:"parou",degr:"degrada",frozen:"congela",hold:"segura"};
+const F_GROUPS=[["stop","Param junto"],["degr","Degradam"],["frozen","Congelam: só as mudanças param"],["hold","Seguram o tranco"]];
+const F_USER={
+  stop:"Para o usuário, o sistema está fora do ar.",
+  degr:"O usuário percebe: algo fica lento, falha ou chega atrasado.",
+  ok:"O usuário nem percebe."
+};
+const F_SAMPLES=["oltp","kafka","notificacoes","k8s","dns","datacenter"];
+const fail={on:false,root:null,red:true,timers:[]};
+const failBtn=document.getElementById("failBtn");
+if(!STYLE.failure) failBtn.hidden=true;
+failBtn.onclick=()=>fail.on?exitFail():enterFail();
+
+function enterFail(){
+  if(jr.on) stopJourney();
+  clearFocus(); setPersona(null);
+  state.ax=null; document.querySelectorAll("#axes .chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  state.sel=null; refresh();
+  fail.on=true; failBtn.setAttribute("aria-pressed","true"); map.classList.add("fail-on");
+  banner.innerHTML=`<b>Modo falha.</b> Toque numa peça para derrubá-la e veja a cascata.
+    <span class="f-legend">${["down","stop","degr","frozen","hold"].map(k=>`<span class="f-${k}"><i></i>${k==="hold"?"segura o tranco":F_LABEL[k]}</span>`).join("")}</span>`;
+  banner.classList.add("on");
+  failIntro();
+}
+function exitFail(){
+  clearFailMarks();
+  fail.on=false; fail.root=null; failBtn.setAttribute("aria-pressed","false"); map.classList.remove("fail-on");
+  banner.classList.remove("on"); setHash(null); intro();
+}
+function clearFailMarks(){
+  fail.timers.forEach(clearTimeout); fail.timers=[];
+  map.classList.remove("f-active");
+  Object.values(el).forEach(b=>{b.classList.remove("f-in","f-down","f-stop","f-degr","f-frozen","f-hold"); b.querySelector(".f-badge").textContent="";});
+  E.forEach(e=>e.path.classList.remove("f-hot","f-down","f-stop","f-degr","f-frozen","f-hold"));
+}
+function redSwitch(){
+  return `<button class="switch f-red" aria-pressed="${fail.red}"><i aria-hidden="true"></i>Com redundância</button>`;
+}
+function bindRed(){
+  panel.querySelector(".f-red").onclick=()=>{fail.red=!fail.red; fail.root?breakNode(fail.root):failIntro();};
+}
+function failIntro(){
+  panel.className="panel open";
+  panel.innerHTML=`<button class="close" aria-label="Sair do modo falha">×</button>
+   <span class="layer-tag f-tag">Modo falha</span>
+   <h3>O que cai junto?</h3>
+   <p class="what">Escolha uma peça para derrubar. A queda se espalha por quem depende dela: alguns param, outros só degradam, e as filas seguram o tranco.</p>
+   ${redSwitch()}
+   <p class="f-note">Ligada, mostra a produção real: réplicas, failover e várias zonas. Desligada, mostra por que elas existem.</p>
+   <h4>Comece por aqui</h4>
+   <div class="near">${F_SAMPLES.filter(k=>N[k]).map(k=>`<button data-break="${k}">${N[k].n}<small>${LAYERS[layerIdx[N[k].l]].n}</small></button>`).join("")}</div>`;
+  panel.querySelector(".close").onclick=exitFail;
+  panel.querySelectorAll("[data-break]").forEach(b=>b.onclick=()=>breakNode(b.dataset.break));
+  bindRed(); panel.scrollTop=0;
+}
+function breakNode(id){
+  if(!fail.on) enterFail();
+  clearFailMarks(); fail.root=id; setHash("falha-"+id);
+  const r=STRATA.simulateFailure(STYLE,id,fail.red);
+  map.classList.add("f-active");
+  Object.entries(r.nodes).sort((a,b)=>a[1].wave-b[1].wave).forEach(([nid,info])=>{
+    const apply=()=>{
+      const b=el[nid]; b.classList.add("f-in","f-"+info.s); b.querySelector(".f-badge").textContent=F_LABEL[info.s];
+      const e=info.cause&&findEdge(info.cause,nid);
+      if(e) e.path.classList.add("f-hot","f-"+info.s);
+      if(info.cause&&!reduce) send(info.cause,nid,`var(--f-${info.s})`,450,5);
+    };
+    if(reduce||!info.wave) apply(); else fail.timers.push(setTimeout(apply,info.wave*550));
+  });
+  failReport(id,r);
+  el[id].scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});
+  const n=Object.keys(r.nodes).length-1;
+  announce.textContent=`${N[id].n} caiu. ${n?n+" peças afetadas.":"Nenhuma outra peça afetada."} ${F_USER[r.user]}`;
+}
+function failReport(id,r){
+  const v=N[id], g=STYLE.failure.guards[id];
+  const groups=F_GROUPS.map(([s,title])=>{
+    const items=Object.entries(r.nodes).filter(([k,x])=>k!==id&&x.s===s).sort((a,b)=>a[1].wave-b[1].wave);
+    if(!items.length) return "";
+    return `<h4 class="f-h f-${s}"><i></i>${title} <span>${items.length}</span></h4>
+      <ul class="f-list">${items.map(([k,x])=>`<li><button data-go="${k}"><b>${N[k].n}</b><span>${x.why}</span></button></li>`).join("")}</ul>`;
+  }).join("");
+  const res=v.ax&&v.ax.res;
+  panel.className="panel open l"+(layerIdx[v.l]+1);
+  panel.innerHTML=`<button class="close" aria-label="Sair do modo falha">×</button>
+   <span class="layer-tag f-tag">Modo falha · Camada ${layerIdx[v.l]+1}</span>
+   <h3>${v.n} caiu</h3>
+   <div class="f-verdict f-u-${r.user}">${F_USER[r.user]}</div>
+   ${redSwitch()}
+   ${g?(fail.red?`<div class="f-guard"><b>Quem segura:</b> ${g[1]}</div>`:`<p class="f-note">Sem redundância, nada segura a queda. Ligue a chave para ver como a produção se protege.</p>`)
+      :`<p class="f-note">Aqui a redundância não evita a queda: o cenário é a peça inteira fora do ar.</p>`}
+   <h4>O que acontece</h4><div class="fail">${v.fail}</div>
+   ${groups||`<p class="f-note">Nenhuma outra peça é afetada.</p>`}
+   ${res&&!g?`<h4>Como se proteger</h4><div class="axnote res"><b>Resiliência:</b> ${res}</div>`:""}
+   <div class="row f-actions"><button data-reset>Derrubar outra peça</button><button data-exit>Sair do modo falha</button></div>`;
+  panel.querySelector(".close").onclick=exitFail;
+  panel.querySelector("[data-exit]").onclick=exitFail;
+  panel.querySelector("[data-reset]").onclick=()=>{clearFailMarks(); fail.root=null; setHash(null); failIntro();};
+  panel.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>el[b.dataset.go].scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"}));
+  bindRed(); panel.scrollTop=0;
+}
+
+/* ---------- deep link: #id abre a peça; #falha-id derruba ---------- */
 function fromHash(){
   const id=decodeURIComponent(location.hash.slice(1));
-  if(N[id]&&state.sel!==id) goTo(id);
+  if(id.startsWith("falha-")&&N[id.slice(6)]&&STYLE.failure) breakNode(id.slice(6));
+  else if(N[id]&&state.sel!==id) goTo(id);
 }
 window.addEventListener("hashchange",fromHash);
 

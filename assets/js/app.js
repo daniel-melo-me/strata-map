@@ -23,9 +23,39 @@ const core=document.getElementById("core");
 LAYERS.forEach((L,i)=>{
   const li=document.createElement("li"); li.className="l"+(i+1);
   li.innerHTML=`<button><span class="depth">${pad(i+1)}</span>${L.n}</button>`;
-  li.querySelector("button").onclick=()=>document.querySelector(".layer.l"+(i+1)).scrollIntoView({block:"start",behavior:reduce?"auto":"smooth"});
+  li.querySelector("button").onclick=()=>focusLayer(i);
   core.appendChild(li);
 });
+
+/* clique numa faixa: desce até a camada e acende as peças dela por alguns segundos */
+let focusTimer=null;
+function focusLayer(i){
+  clearFocus();
+  const sec=document.querySelector(".layer.l"+(i+1));
+  sec.classList.add("is-focus"); map.classList.add("has-focus");
+  sec.scrollIntoView({block:"start",behavior:reduce?"auto":"smooth"});
+  focusTimer=setTimeout(clearFocus,3500);
+}
+function clearFocus(){
+  clearTimeout(focusTimer);
+  map.classList.remove("has-focus");
+  map.querySelectorAll(".layer.is-focus").forEach(x=>x.classList.remove("is-focus"));
+}
+
+/* o pacote desce pelo testemunho, acendendo cada faixa por onde passa */
+const pulse=document.querySelector(".core-pulse"), rows=[...core.children];
+let pi=-1;
+function dive(){
+  if(reduce||document.hidden) return;
+  pi=(pi+1)%(rows.length+2);
+  rows.forEach((r,k)=>r.classList.toggle("lit",k===pi));
+  if(pi<rows.length){
+    const r=rows[pi]; pulse.style.opacity=1;
+    pulse.style.transform=`translateY(${r.offsetTop+r.offsetHeight/2}px)`;
+  }else if(pi===rows.length) pulse.style.opacity=0;
+  else{pulse.style.transition="none"; pulse.style.transform=`translateY(${rows[0].offsetTop+rows[0].offsetHeight/2}px)`; pulse.offsetWidth; pulse.style.transition="";}
+}
+setInterval(dive,600);
 
 LAYERS.forEach((L,i)=>{
   const sec=document.createElement("section"); sec.className="layer l"+(i+1);
@@ -123,7 +153,7 @@ function closePanel(){
   state.sel=null; refresh(); intro(); setHash(null);
 }
 function select(id){
-  state.sel=id; refresh(); setHash(id);
+  clearFocus(); state.sel=id; refresh(); setHash(id);
   const v=N[id], L=LAYERS[layerIdx[v.l]];
   panel.className="panel open l"+(layerIdx[v.l]+1);
   const nb=edgesOf(id).map(e=>{const o=e[0]===id?e[1]:e[0];return `<button data-go="${o}">${N[o].n}<small>${e[3]}</small></button>`;}).join("");
@@ -230,7 +260,7 @@ function showStep(i){
 }
 function startJourney(){
   if(state.sel) closePanel();
-  jr.on=true; setPaused(false); narr.classList.add("on"); showStep(0);
+  clearFocus(); jr.on=true; setPaused(false); narr.classList.add("on"); showStep(0);
 }
 function stopJourney(){jr.on=false;clearTimers();narr.classList.remove("on");clearActive();}
 function jump(i){setPaused(true); showStep(i);}

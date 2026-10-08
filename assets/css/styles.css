@@ -73,12 +73,11 @@ button{font:inherit;color:inherit}
 /* testemunho: as 9 camadas em miniatura */
 .core{position:relative;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--line)}
 .core ol{list-style:none;margin:0;padding:0}
-.core li button{display:flex;align-items:center;gap:14px;width:100%;border:0;background:var(--band);color:var(--band-ink);padding:0 18px 0 32px;height:38px;font-size:14px;font-weight:600;text-align:left;cursor:pointer;box-shadow:inset 4px 0 0 var(--hue);transition:padding .15s}
-.core li button:hover{padding-left:36px}
+.core li button{display:flex;align-items:center;gap:14px;width:100%;border:0;background:var(--band);color:var(--band-ink);padding:0 18px 0 32px;height:38px;font-size:14px;font-weight:600;text-align:left;cursor:pointer;box-shadow:inset 4px 0 0 var(--hue);transition:padding .25s, background .25s}
+.core li button:hover,.core li.lit button{padding-left:36px;background:color-mix(in srgb,var(--hue) 18%,var(--band))}
 .core .depth{font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--hue);width:18px}
 .core li + li button{border-top:1px solid rgba(128,128,128,.12)}
-.core-pulse{position:absolute;left:16px;top:0;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--w-net);box-shadow:0 0 0 3px color-mix(in srgb,var(--w-net) 30%,transparent),0 0 12px var(--w-net);animation:dive 5s cubic-bezier(.45,0,.55,1) infinite;pointer-events:none}
-@keyframes dive{0%{top:0;opacity:0}8%{opacity:1}88%{opacity:1}100%{top:100%;opacity:0}}
+.core-pulse{position:absolute;left:16px;top:0;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--w-net);box-shadow:0 0 0 3px color-mix(in srgb,var(--w-net) 30%,transparent),0 0 12px var(--w-net);opacity:0;transition:transform .5s cubic-bezier(.45,0,.55,1), opacity .3s;pointer-events:none}
 
 /* barra de controles fixa */
 .controls{position:sticky;top:0;z-index:15;display:flex;align-items:center;gap:10px;height:var(--bar-h);padding:0 32px;background:var(--glass);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;white-space:nowrap}
@@ -117,7 +116,7 @@ svg.wires,svg.packets{position:absolute;inset:0;pointer-events:none;overflow:vis
 svg.wires{z-index:1}
 svg.packets{z-index:4}
 
-.layer{position:relative;display:grid;grid-template-columns:220px minmax(0,1fr);background:var(--band);color:var(--band-ink);scroll-margin-top:var(--bar-h)}
+.layer{position:relative;display:grid;grid-template-columns:220px minmax(0,1fr);background:var(--band);transition:background .4s;color:var(--band-ink);scroll-margin-top:var(--bar-h)}
 .layer + .layer{box-shadow:inset 0 1px 0 rgba(128,128,128,.10)}
 .layer-head{padding:26px 18px 26px 32px;position:relative;z-index:2}
 .layer-head .depth{font-family:var(--mono);font-weight:500;font-size:12.5px;letter-spacing:.06em;color:var(--hue);display:block;margin-bottom:8px}
@@ -139,6 +138,13 @@ svg.packets{z-index:4}
 .ax-on-obs .node.ax-obs .ax-dot{display:block;background:var(--obs)}
 .ax-on-res .node.ax-res .ax-dot{display:block;background:var(--res)}
 .ax-on-seg .node:not(.ax-seg),.ax-on-obs .node:not(.ax-obs),.ax-on-res .node:not(.ax-res){opacity:.3}
+/* camada escolhida no testemunho */
+.layer.is-focus{background:color-mix(in srgb,var(--hue) 9%,var(--band))}
+.layer.is-focus .node{border-color:var(--hue);box-shadow:0 0 0 3px color-mix(in srgb,var(--hue) 45%,transparent),var(--shadow-lg);animation:rise .6s ease both}
+.layer.is-focus .node:nth-child(2){animation-delay:.06s} .layer.is-focus .node:nth-child(3){animation-delay:.12s}
+.layer.is-focus .node:nth-child(4){animation-delay:.18s} .layer.is-focus .node:nth-child(n+5){animation-delay:.24s}
+.map.has-focus .layer:not(.is-focus) .node{opacity:.25}
+@keyframes rise{40%{transform:translateY(-5px)}}
 /* persona fora de foco vence o realce de eixo */
 .map .node.is-off{opacity:.18}
 
@@ -226,6 +232,7 @@ svg.packets{z-index:4}
 }
 @media (prefers-reduced-motion: reduce){
   .wire.flow{animation:none}
-  .core-pulse{animation:none;display:none}
+  .core-pulse{display:none}
+  .layer.is-focus .node{animation:none}
   .node,.panel,.btn-main,.core li button,.switch i,.switch i::after{transition:none}
 }

@@ -14,10 +14,22 @@ const el={};
 const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 document.getElementById("styleName").textContent=STYLE.name;
+const totalMs=JOURNEY.reduce((a,x)=>a+x[3],0);
+document.getElementById("playHint").textContent=`${JOURNEY.length} passos em ~${totalMs} ms`;
+const pad=n=>String(n).padStart(2,"0");
+
+/* testemunho: as camadas em miniatura, como uma amostra de solo */
+const core=document.getElementById("core");
+LAYERS.forEach((L,i)=>{
+  const li=document.createElement("li"); li.className="l"+(i+1);
+  li.innerHTML=`<button><span class="depth">${pad(i+1)}</span>${L.n}</button>`;
+  li.querySelector("button").onclick=()=>document.querySelector(".layer.l"+(i+1)).scrollIntoView({block:"start",behavior:reduce?"auto":"smooth"});
+  core.appendChild(li);
+});
 
 LAYERS.forEach((L,i)=>{
   const sec=document.createElement("section"); sec.className="layer l"+(i+1);
-  sec.innerHTML=`<div class="layer-head"><span class="depth">${i+1}</span><h2>${L.n}</h2><p>${L.q}</p></div><div class="nodes"></div>`;
+  sec.innerHTML=`<div class="layer-head"><span class="depth">${pad(i+1)}</span><h2>${L.n}</h2><p>${L.q}</p></div><div class="nodes"></div>`;
   const nodes=sec.querySelector(".nodes");
   Object.entries(N).filter(([,v])=>v.l===L.id).forEach(([id,v])=>{
     const b=document.createElement("button"); b.className="node"; b.dataset.id=id;
@@ -138,14 +150,13 @@ function goTo(id){
 }
 
 /* ---------- controls ---------- */
-const pbox=document.getElementById("personas"), pline=document.getElementById("personaLine");
-Object.entries(PERSONAS).forEach(([k,v])=>{
-  const b=document.createElement("button"); b.className="chip"; b.dataset.p=k; b.textContent=v[0]; b.setAttribute("aria-pressed","false");
-  b.onclick=()=>setPersona(state.persona===k?null:k); pbox.appendChild(b);
-});
+const psel=document.getElementById("personas"), pline=document.getElementById("personaLine");
+Object.entries(PERSONAS).forEach(([k,v])=>psel.add(new Option(v[0],k)));
+psel.onchange=()=>setPersona(psel.value||null);
 function setPersona(k){
-  state.persona=k;
-  document.querySelectorAll("#personas .chip, #panel [data-persona]").forEach(c=>c.setAttribute("aria-pressed",String((c.dataset.p||c.dataset.persona)===k)));
+  state.persona=k; psel.value=k||"";
+  psel.closest(".select").classList.toggle("on",!!k);
+  document.querySelectorAll("#panel [data-persona]").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.persona===k)));
   if(k){const n=Object.values(N).filter(v=>(v.who||[]).includes(k)).length;
     pline.innerHTML=`<b>${PERSONAS[k][0]}:</b> ${PERSONAS[k][1]} Atua em ${n} peças do mapa, acesas abaixo.`;}
   else pline.textContent="";
@@ -223,7 +234,7 @@ function startJourney(){
 }
 function stopJourney(){jr.on=false;clearTimers();narr.classList.remove("on");clearActive();}
 function jump(i){setPaused(true); showStep(i);}
-document.getElementById("play").onclick=startJourney;
+document.querySelectorAll("[data-play]").forEach(b=>b.onclick=startJourney);
 document.getElementById("nStop").onclick=stopJourney;
 document.getElementById("nNext").onclick=()=>{if(jr.i<LAST) jump(jr.i+1);};
 document.getElementById("nPrev").onclick=()=>{if(jr.i>0) jump(jr.i-1);};

@@ -42,7 +42,8 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - "Disparar um clique": 24 passos narrados com contador de milissegundos (~200 ms no total).
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
 - Pacotes ambientes circulando nas conexões; respeita `prefers-reduced-motion`; tema claro e escuro.
-- Tipografia: Bricolage Grotesque (títulos) e Source Sans 3 (corpo). Faixas escurecem conforme a profundidade, como um corte de terreno.
+- Tipografia: Bricolage Grotesque (títulos), Source Sans 3 (corpo) e JetBrains Mono (rótulos técnicos, números de camada, milissegundos). Faixas escurecem conforme a profundidade, como um corte de terreno.
+- Tela inicial: hero com o "testemunho" (as 9 camadas em miniatura, clicáveis, com um pacote descendo) e barra de controles fixa no topo; as personas ficam num seletor.
 
 Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra `STRATA.styles.<nome>` com `nodes` (peças), `edges` (conexões: tipos net, sync, async, run) e `journey`. Para um novo estilo, crie um arquivo em `assets/js/data/` seguindo `microsservicos.js`.
 

@@ -7,38 +7,50 @@
 <meta name="description" content="Um mapa visual e navegável que mostra como um software funciona de ponta a ponta, camada por camada: da tela que você toca até a infraestrutura física.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
 <header class="top">
-  <div class="brand"><b>Strata Map</b><span>O software por inteiro, do clique à infraestrutura física</span></div>
-  <h1>A jornada de um clique</h1>
-  <p>Um corte do software inteiro, da tela que você toca até os cabos, ondas e satélites que carregam tudo. Toque numa peça para abrir por dentro, ou dispare um clique e acompanhe a viagem.</p>
-  <span class="style-tag">Estilo arquitetural: <b id="styleName">microsserviços</b></span>
+  <nav class="topbar">
+    <a class="logo" href="./" aria-label="Strata Map, início">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="4" rx="2" fill="#2F7DD1"/><rect x="2" y="9" width="22" height="4" rx="2" fill="#7A4FE0"/><rect x="2" y="15" width="22" height="4" rx="2" fill="#0F8F7E"/><rect x="2" y="21" width="22" height="3" rx="1.5" fill="#C98B6B"/></svg>
+      <b>Strata Map</b>
+    </a>
+    <span class="style-pill">Estilo arquitetural <b id="styleName">microsserviços</b></span>
+  </nav>
+  <div class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">O software por inteiro, do clique à infraestrutura física</p>
+      <h1>A jornada de um clique</h1>
+      <p class="lede">Um corte do software inteiro, da tela que você toca até os cabos, ondas e satélites que carregam tudo. Toque numa peça para abrir por dentro, ou dispare um clique e acompanhe a viagem.</p>
+      <div class="cta">
+        <button class="btn-main" data-play><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg>Disparar um clique</button>
+        <span class="cta-hint" id="playHint"></span>
+      </div>
+    </div>
+    <nav class="core" aria-label="Ir para a camada">
+      <ol id="core"></ol>
+      <span class="core-pulse" aria-hidden="true"></span>
+    </nav>
+  </div>
 </header>
 
 <div class="controls">
-  <div class="ctl-group">
-    <span>Veja acontecer</span>
-    <div class="row"><button class="btn-main" id="play">Disparar um clique</button></div>
+  <button class="btn-mini" data-play aria-label="Disparar um clique"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg><span>Disparar</span></button>
+  <span class="sep" aria-hidden="true"></span>
+  <div class="seg-group" id="axes" role="group" aria-label="Eixos que atravessam tudo">
+    <button class="chip ax-seg" data-ax="seg" aria-pressed="false"><i></i>Segurança</button>
+    <button class="chip ax-obs" data-ax="obs" aria-pressed="false"><i></i>Observabilidade</button>
+    <button class="chip ax-res" data-ax="res" aria-pressed="false"><i></i>Resiliência</button>
   </div>
-  <div class="ctl-group">
-    <span>Eixos que atravessam tudo</span>
-    <div class="row" id="axes">
-      <button class="chip ax-seg" data-ax="seg" aria-pressed="false">Segurança</button>
-      <button class="chip ax-obs" data-ax="obs" aria-pressed="false">Observabilidade</button>
-      <button class="chip ax-res" data-ax="res" aria-pressed="false">Resiliência</button>
-    </div>
-  </div>
-  <div class="ctl-group">
-    <span>Profundidade</span>
-    <div class="row"><button class="chip" id="runs" aria-pressed="false">Mostrar onde cada coisa roda</button></div>
-  </div>
-  <div class="ctl-group">
+  <span class="sep" aria-hidden="true"></span>
+  <button class="switch" id="runs" aria-pressed="false"><i aria-hidden="true"></i>Onde cada coisa roda</button>
+  <span class="sep" aria-hidden="true"></span>
+  <label class="select">
     <span>Ver pelos olhos de</span>
-    <div class="row" id="personas"></div>
-  </div>
+    <select id="personas"><option value="">Todas as pessoas</option></select>
+  </label>
 </div>
 <div class="banner" id="banner"></div>
 <p class="persona-line" id="personaLine"></p>

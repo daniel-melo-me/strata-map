@@ -133,6 +133,8 @@ assets/js/data/microsservicos.js  peças, conexões, jornada e falhas do estilo 
 assets/js/data/monolito.js     o mesmo para o monólito, reaproveitando as peças comuns
 assets/js/failure.js           cálculo da cascata do modo falha
 assets/js/app.js               render do mapa, painel, filtros, jornada e modo falha
+assets/img/                    favicon, ícone para iOS e imagem de prévia (og.png)
+tools/og-image.html            fonte da imagem de prévia; o comando para regenerar está no arquivo
 ```
 
 Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges`, `journey` e `failure` (dependências e redundâncias do modo falha), seguindo o formato de `microsservicos.js`.

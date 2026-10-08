@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- Fonte da imagem de prévia (assets/img/og.png, 1200×630).
+     Para regenerar, a partir da raiz do projeto:
+     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+       --virtual-time-budget=5000 --window-size=1200,630 --screenshot=assets/img/og.png "file://$PWD/tools/og-image.html" -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=block" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden}
+  body{background:radial-gradient(900px 600px at 85% 20%,#16212E 0%,#0B1015 60%);color:#E8EDF2;font-family:"Source Sans 3",sans-serif;position:relative}
+  .copy{position:absolute;left:72px;top:64px;width:600px;height:502px;display:flex;flex-direction:column}
+  .logo{display:flex;align-items:center;gap:14px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:30px;letter-spacing:-.01em}
+  .eyebrow{margin-top:auto;font-family:"JetBrains Mono",monospace;font-size:17px;letter-spacing:.06em;text-transform:uppercase;color:#93A0AD}
+  h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:62px;line-height:1;letter-spacing:-.035em;margin:16px 0 0}
+  .tags{display:flex;gap:10px;margin-top:34px}
+  .tags span{border:1px solid #2C3846;border-radius:999px;padding:7px 16px;font-size:19px;font-weight:600;color:#C9D2DB}
+  .url{margin-top:auto;font-family:"JetBrains Mono",monospace;font-size:18px;color:#6AA6F5}
+
+  .core{position:absolute;right:72px;top:64px;width:400px;border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}
+  .core div{display:flex;align-items:center;gap:16px;height:55.7px;padding-left:46px;font-size:21px;font-weight:600;color:#121A23;box-shadow:inset 6px 0 0 var(--h)}
+  .core div + div{border-top:1px solid rgba(128,128,128,.14)}
+  .core i{font-style:normal;font-family:"JetBrains Mono",monospace;font-size:15px;font-weight:500;color:var(--h);width:22px}
+  .core .dk{color:#F3EDE6}
+  .probe{position:absolute;right:72px;top:64px;width:400px;height:501px;pointer-events:none}
+</style>
+</head>
+<body>
+  <div class="copy">
+    <div class="logo">
+      <svg width="46" height="46" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <clipPath id="sm-c"><rect width="64" height="64" rx="15"/></clipPath>
+          <linearGradient id="sm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2938"/><stop offset="1" stop-color="#101820"/></linearGradient>
+        </defs>
+        <g clip-path="url(#sm-c)">
+          <rect width="64" height="64" fill="url(#sm-sky)"/>
+          <path d="M0 25 C14 20 30 29 64 22 V64 H0Z" fill="#4A8FE8"/>
+          <path d="M0 35 C16 30 34 39 64 32 V64 H0Z" fill="#8058E8"/>
+          <path d="M0 45 C16 40 36 49 64 42 V64 H0Z" fill="#119C88"/>
+          <path d="M0 55 C18 51 38 58 64 52 V64 H0Z" fill="#B97B5A"/>
+          <path d="M40 15 V64" stroke="#fff" stroke-width="3.4"/>
+          <circle cx="40" cy="14" r="6.5" fill="#fff"/>
+          <circle cx="40" cy="14" r="2.6" fill="#101820"/>
+        </g>
+      </svg>
+      Strata Map
+    </div>
+    <p class="eyebrow">A jornada de um clique</p>
+    <h1>O software por inteiro, do clique à infraestrutura física.</h1>
+    <div class="tags"><span>Microsserviços</span><span>Monólito</span><span>Modo falha</span></div>
+    <p class="url">strata.dancode.com.br</p>
+  </div>
+
+  <div class="core">
+    <div style="background:#F0F5FB;--h:#2F7DD1"><i>01</i>Experiência</div>
+    <div style="background:#EAF0F6;--h:#5B6B7F"><i>02</i>Rede e internet</div>
+    <div style="background:#E4E9EE;--h:#D9731F"><i>03</i>Borda do sistema</div>
+    <div style="background:#DFE3E6;--h:#7A4FE0"><i>04</i>Aplicação</div>
+    <div style="background:#D9DBDA;--h:#C2399A"><i>05</i>Integração e eventos</div>
+    <div style="background:#D2D0CA;--h:#0F8F7E"><i>06</i>Dados</div>
+    <div style="background:#C6C0B5;--h:#3E7C3A"><i>07</i>Plataforma</div>
+    <div class="dk" style="background:#5A4E42;--h:#E0B064"><i>08</i>Infraestrutura</div>
+    <div class="dk" style="background:#3A312A;--h:#E0A07E"><i>09</i>Físico</div>
+  </div>
+  <svg class="probe" viewBox="0 0 400 501" aria-hidden="true">
+    <line x1="24" y1="0" x2="24" y2="501" stroke="#3B7DD8" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round" opacity=".8"/>
+    <circle cx="24" cy="306" r="13" fill="#3B7DD8" opacity=".22"/>
+    <circle cx="24" cy="306" r="7" fill="#3B7DD8" stroke="#fff" stroke-width="2.5"/>
+  </svg>
+</body>
+</html>

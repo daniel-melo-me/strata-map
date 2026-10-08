@@ -38,6 +38,8 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `assets/js/data/monolito.js`: o mesmo para o monólito. Reaproveita as peças comuns de microsservicos.js com `pick(id, ajustes)`, então precisa carregar depois dele.
 - `assets/js/failure.js`: cálculo da cascata do modo falha (função pura, testável no Node).
 - `assets/js/app.js`: render do mapa, painel, filtros, jornada e modo falha.
+- `assets/img/`: favicon, apple-touch-icon e `og.png` (prévia de compartilhamento, 1200×630).
+- `tools/og-image.html`: fonte do `og.png`, com o comando do Chrome headless para regenerar. Regenerar quando mudar a marca, a tagline ou os estilos citados na imagem.
 
 - 9 camadas: Experiência, Rede e internet, Borda do sistema, Aplicação, Integração e eventos, Dados, Plataforma, Infraestrutura, Físico.
 - Microsserviços: 41 peças, jornada de 24 passos (~188 ms). Monólito: 35 peças (aplicação monolítica, módulos de autenticação, pedidos, pagamentos e notificações, fila de jobs), jornada de 19 passos (~166 ms). Cada peça abre um painel com: o que é, por dentro, tecnologias reais, onde pode rodar, quem cuida, se cair, eixos transversais e conexões.

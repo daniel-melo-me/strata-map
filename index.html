@@ -75,6 +75,7 @@
 
 <div class="controls">
   <button class="btn-mini" data-play aria-label="Disparar um clique"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg><span>Disparar</span></button>
+  <button class="btn-search" id="searchBtn" aria-haspopup="dialog"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Buscar</span><kbd id="searchKbd">⌘K</kbd></button>
   <span class="sep" aria-hidden="true"></span>
   <div class="seg-group" id="axes" role="group" aria-label="Eixos que atravessam tudo">
     <button class="chip ax-seg" data-ax="seg" aria-pressed="false"><i></i>Segurança</button>
@@ -103,6 +104,17 @@
 </main>
 <p class="sr-only" id="announce" aria-live="polite"></p>
 
+<dialog class="search" id="search" aria-label="Buscar no mapa">
+  <div class="search-box">
+    <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <input id="q" type="text" placeholder="Peça, tecnologia ou conceito: Kafka, JWT, DNS…" autocomplete="off" spellcheck="false"
+      role="combobox" aria-expanded="true" aria-controls="results" aria-autocomplete="list">
+    <kbd>Esc</kbd>
+  </div>
+  <ul id="results" role="listbox" aria-label="Resultados"></ul>
+  <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> escolher</span><span><kbd>Enter</kbd> abrir</span><span><kbd>Esc</kbd> fechar</span></p>
+</dialog>
+
 <div class="narr" id="narr" role="status">
   <div class="meta"><span id="nStep"></span><span id="nMs"></span></div>
   <div class="bar"><i id="nBar"></i></div>
@@ -119,6 +131,7 @@
 <script src="assets/js/data/microsservicos.js"></script>
 <script src="assets/js/data/monolito.js"></script>
 <script src="assets/js/failure.js"></script>
+<script src="assets/js/search.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>

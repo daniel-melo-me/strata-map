@@ -70,6 +70,10 @@ Cada queda também mostra o que aconteceria no outro estilo: no monólito, um m�
 
 A chave **Com redundância** mostra a produção real, com réplicas, failover e várias zonas. Desligada, mostra a cascata inteira e por que a redundância existe. Cada cenário tem link direto: `#falha-oltp` abre o mapa com o banco relacional derrubado.
 
+### 🔎 Busca rápida
+
+Aperte **⌘K** (ou **Ctrl+K**, ou **/**) e digite uma peça, tecnologia ou conceito: Kafka, JWT, Redis, failover. A busca ignora acentos, entende apelidos como k8s e db e mostra por que cada peça apareceu. Se o termo só existe no outro estilo, ela leva até lá.
+
 ### 🧪 Eixos que atravessam tudo
 
 Acenda as peças por onde passa cada preocupação transversal:
@@ -132,6 +136,7 @@ assets/js/data/base.js         camadas, personas e eixos (comuns a todos os esti
 assets/js/data/microsservicos.js  peças, conexões, jornada e falhas do estilo microsserviços
 assets/js/data/monolito.js     o mesmo para o monólito, reaproveitando as peças comuns
 assets/js/failure.js           cálculo da cascata do modo falha
+assets/js/search.js            busca rápida por nome, tecnologia e conteúdo das peças
 assets/js/app.js               render do mapa, painel, filtros, jornada e modo falha
 assets/img/                    favicon, ícone para iOS e imagem de prévia (og.png)
 tools/og-image.html            fonte da imagem de prévia; o comando para regenerar está no arquivo
@@ -145,6 +150,7 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 
 - [x] Segundo estilo arquitetural: monólito
 - [ ] Novos estilos arquiteturais: event-driven, hexagonal e serverless
+- [x] Busca rápida (⌘K)
 - [ ] Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça
 - [ ] Validação de conformidade: checar se uma aplicação está apta a uma arquitetura
 - [ ] Linha do tempo: como as arquiteturas evoluíram, e por quê

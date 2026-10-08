@@ -1,4 +1,4 @@
-/* Strata Map: render do mapa, painel de detalhes, eixos, personas, jornada e modo falha.
+/* Strata Map: render do mapa, painel de detalhes, eixos, personas, jornada, modo falha e busca.
  * Os dados vêm de assets/js/data/ (window.STRATA). */
 (function(){
 const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
@@ -293,7 +293,80 @@ nPause.onclick=()=>{
     if(jr.i<LAST) showStep(jr.i+1); else finish();
   }else{setPaused(true); clearTimers();}
 };
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!search.open){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
+
+/* ---------- busca (⌘K, Ctrl+K ou /) ---------- */
+const search=document.getElementById("search"), q=document.getElementById("q"), results=document.getElementById("results");
+const SUGGEST=["Kafka","JWT","Redis","Kubernetes","DNS","Pix","failover","CDC"];
+const isMac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
+document.getElementById("searchKbd").textContent=isMac?"⌘K":"Ctrl K";
+let hits=[], cur=0;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
+const mark=s=>esc(s).replace(/\u0001/g,"<mark>").replace(/\u0002/g,"</mark>");
+
+function openSearch(){
+  if(search.open) return;
+  if(jr.on) stopJourney();
+  search.showModal(); q.value=""; renderResults(); q.focus();
+}
+function renderResults(){
+  const text=q.value.trim();
+  if(!text){
+    hits=[]; q.removeAttribute("aria-activedescendant");
+    results.innerHTML=`<li class="r-empty">Experimente:<span class="r-sugs">${SUGGEST.map(s=>`<button type="button" data-sug="${s}">${s}</button>`).join("")}</span></li>`;
+    results.querySelectorAll("[data-sug]").forEach(b=>b.onclick=()=>{q.value=b.dataset.sug; renderResults(); q.focus();});
+    return;
+  }
+  hits=STRATA.searchNodes(STYLE,LAYERS,text).slice(0,8).map(h=>({...h,href:null}));
+  /* termos que só existem em outro estilo levam para lá */
+  Object.entries(styles).forEach(([sid,s])=>{
+    if(sid===STYLE_ID) return;
+    STRATA.searchNodes(s,LAYERS,text).filter(h=>!N[h.id]).slice(0,3)
+      .forEach(h=>hits.push({...h,href:`?estilo=${sid}#${h.id}`,styleName:s.name}));
+  });
+  cur=0;
+  if(!hits.length){results.innerHTML=`<li class="r-empty">Nada encontrado para “${esc(text)}”.</li>`; q.removeAttribute("aria-activedescendant"); return;}
+  let other=false;
+  results.innerHTML=hits.map((h,i)=>{
+    const head=h.href&&!other?(other=true,`<li class="r-sep" role="presentation">Em outros estilos</li>`):"";
+    const li=layerIdx[h.layer.id]+1;
+    return head+`<li role="option" id="r-${i}" class="r l${li}" data-i="${i}">
+      <span class="r-dot" aria-hidden="true"></span>
+      <span class="r-body"><b>${mark(h.name)}</b><small>${h.label?`<em>${esc(h.label)}:</em> `:""}${mark(h.detail)}</small></span>
+      <span class="r-meta">${h.href?`${esc(h.styleName)} →`:`${pad(li)} ${esc(h.layer.n)}`}</span></li>`;
+  }).join("");
+  results.querySelectorAll(".r").forEach(r=>{
+    r.onclick=()=>choose(+r.dataset.i);
+    r.onmousemove=()=>{if(cur!==+r.dataset.i) setCur(+r.dataset.i);};
+  });
+  setCur(0);
+}
+function setCur(i){
+  cur=i;
+  results.querySelectorAll(".r").forEach(r=>r.setAttribute("aria-selected",String(+r.dataset.i===i)));
+  q.setAttribute("aria-activedescendant","r-"+i);
+  const r=document.getElementById("r-"+i); if(r) r.scrollIntoView({block:"nearest"});
+}
+function choose(i){
+  const h=hits[i]; if(!h) return;
+  search.close();
+  if(h.href){location.href=h.href; return;}
+  if(fail.on) exitFail();
+  goTo(h.id);
+}
+q.addEventListener("input",renderResults);
+q.addEventListener("keydown",e=>{
+  if(e.key==="ArrowDown"&&hits.length){e.preventDefault(); setCur((cur+1)%hits.length);}
+  else if(e.key==="ArrowUp"&&hits.length){e.preventDefault(); setCur((cur-1+hits.length)%hits.length);}
+  else if(e.key==="Enter"){e.preventDefault(); choose(cur);}
+});
+search.addEventListener("click",e=>{if(e.target===search) search.close();});
+document.getElementById("searchBtn").onclick=openSearch;
+document.addEventListener("keydown",e=>{
+  const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if((e.key==="k"||e.key==="K")&&(e.metaKey||e.ctrlKey)){e.preventDefault(); search.open?search.close():openSearch();}
+  else if(e.key==="/"&&!typing&&!search.open){e.preventDefault(); openSearch();}
+});
 
 /* ---------- modo falha ---------- */
 const ICON_BOLT=`<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2 1 3 8h3.6L5.8 13 11 6H7.4z" fill="currentColor"/></svg>`;

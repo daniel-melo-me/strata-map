@@ -37,7 +37,8 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `assets/js/data/microsservicos.js`: peças, conexões, jornada e falhas do estilo microsserviços.
 - `assets/js/data/monolito.js`: o mesmo para o monólito. Reaproveita as peças comuns de microsservicos.js com `pick(id, ajustes)`, então precisa carregar depois dele.
 - `assets/js/failure.js`: cálculo da cascata do modo falha (função pura, testável no Node).
-- `assets/js/app.js`: render do mapa, painel, filtros, jornada e modo falha.
+- `assets/js/search.js`: busca rápida (função pura, testável no Node): pesos por campo, sem acentos, apelidos como k8s e db.
+- `assets/js/app.js`: render do mapa, painel, filtros, jornada, modo falha e caixa de busca.
 - `assets/img/`: favicon, apple-touch-icon e `og.png` (prévia de compartilhamento, 1200×630).
 - `tools/og-image.html`: fonte do `og.png`, com o comando do Chrome headless para regenerar. Regenerar quando mudar a marca, a tagline ou os estilos citados na imagem.
 
@@ -46,6 +47,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - "Disparar um clique": passos narrados com contador de milissegundos.
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
 - Modo falha: derrubar uma peça mostra quem para, degrada, congela ou segura o tranco, e se o usuário percebe. Chave "Com redundância" (ligada = produção real; desligada = cascata inteira). Link direto `#falha-<id>`. O relatório compara com a mesma queda nos outros estilos.
+- Busca rápida: ⌘K, Ctrl+K ou /. Procura em nome, tecnologias, "por dentro", descrição, onde roda, camada e "se cair"; mostra o trecho que explica o resultado e, para termos que só existem em outro estilo, leva até ele.
 - Pacotes ambientes circulando nas conexões; respeita `prefers-reduced-motion`; tema claro e escuro.
 - Tipografia: Bricolage Grotesque (títulos), Source Sans 3 (corpo) e JetBrains Mono (rótulos técnicos, números de camada, milissegundos). Faixas escurecem conforme a profundidade, como um corte de terreno.
 - Tela inicial: hero com o "testemunho" (as 9 camadas em miniatura, clicáveis, com um pacote descendo) e barra de controles fixa no topo; as personas ficam num seletor.

@@ -91,6 +91,35 @@ Filtre o mapa pelo papel de quem atua em cada camada:
 
 ---
 
+## 🚀 Como rodar
+
+É um site estático, sem build e sem dependências. Basta abrir o `index.html` no navegador.
+
+Se preferir um servidor local:
+
+```bash
+python3 -m http.server 8000
+# abra http://localhost:8000
+```
+
+Cada peça tem link direto: `index.html#pedidos` abre o mapa já com o serviço de pedidos aberto.
+
+---
+
+## 🗂️ Estrutura
+
+```
+index.html                     estrutura da página
+assets/css/styles.css          estilos, temas claro e escuro
+assets/js/data/base.js         camadas, personas e eixos (comuns a todos os estilos)
+assets/js/data/microsservicos.js  peças, conexões e jornada do estilo microsserviços
+assets/js/app.js               render do mapa, painel, filtros e jornada
+```
+
+Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges` e `journey`, seguindo o formato de `microsservicos.js`.
+
+---
+
 ## 🛣️ Próximos passos
 
 - [ ] Novos estilos arquiteturais: event-driven, hexagonal, serverless e monólito

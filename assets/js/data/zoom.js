@@ -62,7 +62,7 @@ dns:{
   what:"A hierarquia que permite achar qualquer domínio do mundo começando sempre do mesmo ponto.",
   ex:["Perguntando ao DNS pelo terminal","$ dig +short loja.com.br\n203.0.113.10"],
   kids:[
-   ["Raiz","13 identidades de servidores raiz, operadas por 12 organizações e replicadas em mais de mil locais pelo mundo."],
+   ["Raiz","13 identidades de servidores raiz, operadas por 12 organizações e replicadas, por anycast, em cerca de 2 mil servidores pelo mundo."],
    ["TLD","Os servidores de .com, .org e .br. O .br é operado pelo Registro.br, do NIC.br."],
    ["Delegação","Cada nível só sabe quem é o próximo: a raiz aponta para o .br, que aponta para os servidores de loja.com.br."]
   ]},
@@ -93,7 +93,7 @@ tls:{
     kids:[
      ["Chaves efêmeras","São jogadas fora quando a conexão termina."],
      ["Sigilo futuro","Se a chave privada do servidor vazar amanhã, as conversas de hoje continuam protegidas."],
-     ["Pós-quântico","Navegadores e servidores já combinam o ECDHE com o ML-KEM, para resistir a futuros computadores quânticos."]
+     ["Pós-quântico","Os navegadores atuais e muitos servidores já combinam o ECDHE com o ML-KEM, para resistir a futuros computadores quânticos."]
     ]}],
    ["Finished","Os dois confirmam que ninguém alterou o handshake. Daqui em diante, tudo é cifrado."]
   ]},
@@ -426,7 +426,7 @@ provedor:{
  "Última milha":{
   what:"O trecho entre a rede do provedor e a sua casa. É onde estão as maiores diferenças de velocidade.",
   kids:[
-   ["FTTH","Fibra até a casa: a tecnologia dominante na banda larga fixa no Brasil."],
+   ["FTTH","Fibra até a casa: cerca de 80% dos acessos de banda larga fixa no Brasil, segundo a Anatel."],
    ["GPON","Uma fibra do provedor é dividida por divisores ópticos passivos entre dezenas de casas."],
    ["Cabo, rádio e satélite","Onde a fibra não chega, o acesso vem por cabo coaxial, rádio ou satélite."]
   ]},
@@ -440,7 +440,7 @@ provedor:{
  "Pontos de troca de tráfego":{
   what:"Lugares onde várias redes se conectam diretamente para trocar tráfego, sem intermediários.",
   kids:[
-   ["IX.br","O programa de pontos de troca do NIC.br, com dezenas de localidades no país. O de São Paulo está entre os maiores do mundo."],
+   ["IX.br","O programa de pontos de troca do NIC.br, em 39 áreas metropolitanas. O de São Paulo, com picos acima de 35 Tbps, está entre os maiores do mundo."],
    ["Peering","Duas redes trocam tráfego entre si, em geral sem cobrança."],
    ["Trânsito","Uma rede paga a outra para chegar ao resto da internet."]
   ]}
@@ -1240,9 +1240,9 @@ fibra:{
  "Cabos submarinos":{
   what:"Quase todo o tráfego entre continentes passa por cabos no fundo do mar, não por satélites.",
   kids:[
-   ["Volume","Mais de 95% do tráfego internacional de dados passa por eles."],
+   ["Volume","Entre 95% e 99% do tráfego entre continentes passa por eles. O tráfego dentro do país, em geral, nem chega ao mar."],
    ["Repetidores","A cada dezenas de quilômetros, amplificadores reforçam o sinal, alimentados por energia que corre no próprio cabo."],
-   ["Brasil","Fortaleza é um dos grandes pontos de chegada de cabos do mundo, com ligações para a América do Norte, a Europa e a África."]
+   ["Brasil","Fortaleza é o maior ponto de chegada de cabos das Américas, com cerca de 17 cabos ligando o Brasil à América do Norte, à Europa e à África."]
   ]},
  "Backbone":{
   what:"As grandes rotas de fibra que ligam cidades e países, operadas por provedores e operadoras.",
@@ -1271,7 +1271,7 @@ cobre:{
   what:"O fio do telefone fixo, adaptado para dados com o DSL.",
   kids:[
    ["ADSL e VDSL","Usam frequências acima da voz no mesmo fio. Quanto mais longe da central, mais lento."],
-   ["Em declínio","No Brasil, a fibra substituiu a maior parte do DSL na última década."],
+   ["Em declínio","No Brasil, a fibra substituiu quase todo o DSL: os cabos metálicos somam pouco mais de 1% dos acessos fixos."],
    ["O cobre que fica","O par trançado continua dentro de prédios e escritórios, onde as distâncias são curtas."]
   ]}
 },
@@ -1280,7 +1280,7 @@ radio:{
   what:"Rádio de curto alcance, em faixas que dispensam licença.",
   kids:[
    ["2,4 GHz","Vai mais longe e atravessa paredes, mas é lenta e congestionada."],
-   ["5 e 6 GHz","Mais rápidas e com mais canais, mas de alcance menor. A de 6 GHz foi liberada no Brasil em 2021."],
+   ["5 e 6 GHz","Mais rápidas e com mais canais, mas de alcance menor. Em 2021 a Anatel deu os 6 GHz inteiros ao Wi-Fi; no fim de 2024 dividiu a faixa: 500 MHz ficaram com o Wi-Fi e 700 MHz foram reservados à telefonia móvel."],
    ["Malha (mesh)","Vários pontos de acesso cobrindo a casa toda como uma rede só."]
   ]},
  "Rede celular":{
@@ -1310,7 +1310,7 @@ satelite:{
   what:"Constelações de milhares de satélites a algumas centenas de quilômetros de altura.",
   kids:[
    ["Latência","Algo entre 25 e 60 milissegundos, perto da banda larga terrestre."],
-   ["Constelação","Cada satélite cruza o céu em minutos, por isso são necessários milhares deles."],
+   ["Constelação","Cada satélite cruza o céu em minutos, por isso são necessários milhares: a Starlink tem perto de 10 mil em órbita."],
    ["Antena eletrônica","A antena muda a direção do feixe eletronicamente para seguir os satélites, sem partes móveis."]
   ]},
  "Estação terrestre":{

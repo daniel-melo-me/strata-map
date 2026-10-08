@@ -80,7 +80,7 @@ No topo, escolha entre o tema do sistema, claro ou escuro. A escolha fica guarda
 
 ### 🔎 Busca rápida
 
-Aperte **⌘K** (ou **Ctrl+K**, ou **/**) e digite uma peça, tecnologia ou conceito: Kafka, JWT, Redis, failover. A busca ignora acentos, entende apelidos como k8s e db e mostra por que cada peça apareceu. Se o termo só existe no outro estilo, ela leva até lá.
+Aperte **⌘K** (ou **Ctrl+K**, ou **/**) e digite uma peça, tecnologia ou conceito: Kafka, JWT, B-tree, PKCE, failover. A busca procura nas peças e nos cartões do zoom, ignora acentos, entende apelidos como k8s e db e mostra por que cada resultado apareceu. Um cartão do zoom abre direto no nível certo, destacado. Se o termo só existe no outro estilo, ela leva até lá.
 
 ### 🧪 Eixos que atravessam tudo
 
@@ -133,6 +133,12 @@ python3 -m http.server 8000
 
 Cada peça tem link direto: `index.html#pedidos` abre o mapa já com o serviço de pedidos aberto.
 
+Antes de publicar uma mudança no conteúdo, valide as referências (o GitHub também roda isso a cada push):
+
+```bash
+node tests/validate.js
+```
+
 ---
 
 ## 🗂️ Estrutura
@@ -149,6 +155,8 @@ assets/js/search.js            busca rápida por nome, tecnologia e conteúdo da
 assets/js/app.js               render do mapa, painel, filtros, jornada e modo falha
 assets/img/                    favicon, ícone para iOS e imagem de prévia (og.png)
 tools/og-image.html            fonte da imagem de prévia; o comando para regenerar está no arquivo
+tests/validate.js              valida peças, conexões, jornadas, modo falha, zoom, busca e arquivos citados
+.github/workflows/validar.yml  roda a validação a cada push e pull request
 ```
 
 Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges`, `journey` e `failure` (dependências e redundâncias do modo falha), seguindo o formato de `microsservicos.js`.

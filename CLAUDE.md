@@ -49,7 +49,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
 - Modo falha: derrubar uma peça mostra quem para, degrada, congela ou segura o tranco, e se o usuário percebe. Chave "Com redundância" (ligada = produção real; desligada = cascata inteira). Link direto `#falha-<id>`. O relatório compara com a mesma queda nos outros estilos.
 - Zoom dentro do zoom: botão "Entrar na peça" no painel (ou clique num item do "por dentro"). Tela cheia na cor da camada, cartões que abrem até 3 níveis, trilha para voltar, Esc sobe um nível, link `#zoom-<id>-<item>-<subitem>`. Todas as peças dos dois estilos têm zoom (162 itens, 513 cartões). A lupa no mapa só aparece se o estilo tiver peças sem zoom. Peças com o mesmo id nos dois estilos dividem o objeto em `STRATA.zoom[id]`; itens com o mesmo nome (Templates, Idempotência, Agendador) servem aos dois, então o texto precisa valer nos dois contextos.
-- Busca rápida: ⌘K, Ctrl+K ou /. Procura em nome, tecnologias, "por dentro", descrição, onde roda, camada e "se cair"; mostra o trecho que explica o resultado e, para termos que só existem em outro estilo, leva até ele.
+- Busca rápida: ⌘K, Ctrl+K ou /. Procura nas peças (nome, tecnologias, "por dentro", descrição, onde roda, camada, "se cair") e nos cartões do zoom (`searchZoom`); um resultado do zoom abre o nível certo com o cartão destacado. Mostra o trecho que explica o resultado e, para termos que só existem em outro estilo, leva até ele.
 - Pacotes ambientes circulando nas conexões; respeita `prefers-reduced-motion`; tema claro e escuro, com seletor no topo (sistema, claro, escuro). A escolha fica em `localStorage` ("strata-theme") e é aplicada por um script no `<head>`, antes de pintar; o CSS usa `:root[data-theme]` e, sem ele, `prefers-color-scheme`.
 - Tipografia: Bricolage Grotesque (títulos), Source Sans 3 (corpo) e JetBrains Mono (rótulos técnicos, números de camada, milissegundos). Faixas escurecem conforme a profundidade, como um corte de terreno.
 - Tela inicial: hero com o "testemunho" (as 9 camadas em miniatura, clicáveis, com um pacote descendo) e barra de controles fixa no topo; as personas ficam num seletor.
@@ -62,6 +62,12 @@ Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra 
 - Validação de conformidade (adiada): requisitos por arquitetura com peso (inegociáveis, estruturais, operação), gerando score de aptidão e lista de lacunas.
 - Linha do tempo da evolução das arquiteturas, custo e trade-off por peça.
 - Eixo de processo ágil (discovery, refinamento, sprint, review, retro).
+
+## Validação e fatos
+
+- Rode `node tests/validate.js` depois de mexer em dados. O GitHub Actions (`.github/workflows/validar.yml`) roda o mesmo a cada push. Erros quebram a verificação; peças sem conexão ou itens sem zoom só geram aviso.
+- Ids de peça: letra minúscula seguida de letras e números (vão nos links `#id`, `#falha-id`, `#zoom-id-…`).
+- Fatos com data foram checados na web em outubro de 2026: validade de certificados (200 dias desde mar/2026, 47 em 2029), faixa de 6 GHz (dividida pela Anatel no fim de 2024: 500 MHz Wi-Fi, 700 MHz móvel), failover do RDS (60 a 120 s), latência e tamanho da Starlink, ML-KEM nos navegadores, ~2 mil instâncias de servidores raiz, fibra em ~80% da banda larga fixa, IX.br, cabos de Fortaleza, PUE das nuvens. Rechecar antes de grandes divulgações.
 
 ## Como trabalhar comigo
 

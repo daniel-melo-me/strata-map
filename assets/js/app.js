@@ -324,7 +324,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!search.open&&!zv.o
 
 /* ---------- busca (⌘K, Ctrl+K ou /) ---------- */
 const search=document.getElementById("search"), q=document.getElementById("q"), results=document.getElementById("results");
-const SUGGEST=["Kafka","JWT","Redis","Kubernetes","DNS","Pix","failover","CDC"];
+const SUGGEST=["Kafka","JWT","B-tree","Kubernetes","DNS","Pix","failover","anycast"];
 const isMac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
 document.getElementById("searchKbd").textContent=isMac?"⌘K":"Ctrl K";
 let hits=[], cur=0;
@@ -344,7 +344,12 @@ function renderResults(){
     results.querySelectorAll("[data-sug]").forEach(b=>b.onclick=()=>{q.value=b.dataset.sug; renderResults(); q.focus();});
     return;
   }
-  hits=STRATA.searchNodes(STYLE,LAYERS,text).slice(0,8).map(h=>({...h,href:null}));
+  /* peças primeiro; depois os cartões do zoom. Uma peça que só apareceu pelo "por dentro"
+     sai da lista quando o próprio cartão daquele item também apareceu */
+  const zoomHits=STRATA.searchZoom(STYLE,LAYERS,Z,text).slice(0,8);
+  const nodeHits=STRATA.searchNodes(STYLE,LAYERS,text)
+    .filter(h=>!(h.label.startsWith("Por dentro")&&zoomHits.some(z=>z.id===h.id))).slice(0,6);
+  hits=[...nodeHits,...zoomHits].map(h=>({...h,href:null}));
   /* termos que só existem em outro estilo levam para lá */
   Object.entries(styles).forEach(([sid,s])=>{
     if(sid===STYLE_ID) return;
@@ -353,14 +358,17 @@ function renderResults(){
   });
   cur=0;
   if(!hits.length){results.innerHTML=`<li class="r-empty">Nada encontrado para “${esc(text)}”.</li>`; q.removeAttribute("aria-activedescendant"); return;}
-  let other=false;
+  let other=false, inner=false;
   results.innerHTML=hits.map((h,i)=>{
-    const head=h.href&&!other?(other=true,`<li class="r-sep" role="presentation">Em outros estilos</li>`):"";
+    let head="";
+    if(h.href&&!other){ other=true; head=`<li class="r-sep" role="presentation">Em outros estilos</li>`; }
+    else if(h.kind==="zoom"&&!inner){ inner=true; head=`<li class="r-sep" role="presentation">Por dentro das peças</li>`; }
     const li=layerIdx[h.layer.id]+1;
-    return head+`<li role="option" id="r-${i}" class="r l${li}" data-i="${i}">
+    const meta=h.href?`${esc(h.styleName)} →`:h.kind==="zoom"?`${ICON_LENS}${esc(h.crumbs.join(" › "))}`:`${pad(li)} ${esc(h.layer.n)}`;
+    return head+`<li role="option" id="r-${i}" class="r l${li}${h.kind==="zoom"?" r-zoom":""}" data-i="${i}">
       <span class="r-dot" aria-hidden="true"></span>
       <span class="r-body"><b>${mark(h.name)}</b><small>${h.label?`<em>${esc(h.label)}:</em> `:""}${mark(h.detail)}</small></span>
-      <span class="r-meta">${h.href?`${esc(h.styleName)} →`:`${pad(li)} ${esc(h.layer.n)}`}</span></li>`;
+      <span class="r-meta">${meta}</span></li>`;
   }).join("");
   results.querySelectorAll(".r").forEach(r=>{
     r.onclick=()=>choose(+r.dataset.i);
@@ -381,6 +389,7 @@ function choose(i){
   if(zv.open) closeZoom(true);
   if(fail.on) exitFail();
   goTo(h.id);
+  if(h.kind==="zoom") openZoom(h.path, h.hl);
 }
 q.addEventListener("input",renderResults);
 q.addEventListener("keydown",e=>{
@@ -524,7 +533,7 @@ function zLevel(path){
 function validPath(p){
   try{ if(!N[p[0]]) return false; const L=zLevel(p); return !!(L&&L.what); }catch(_){ return false; }
 }
-function zStage(path){
+function zStage(path, hl){
   const L=zLevel(path), v=N[path[0]], li=layerIdx[v.l]+1;
   const st=document.createElement("div"); st.className="zv-stage";
   st.innerHTML=`<div class="zv-in">
@@ -533,8 +542,8 @@ function zStage(path){
     <p class="zv-what">${L.what}</p>
     ${L.ex?`<figure class="zv-ex"><figcaption>${esc(L.ex[0])}</figcaption><pre><code>${esc(L.ex[1])}</code></pre></figure>`:""}
     <div class="zv-grid">${L.cards.map((c,i)=>c.kids
-      ?`<button class="zv-card can" data-i="${i}"><b>${c.n}</b><span>${c.t}</span><em>${ICON_LENS}${c.kids} partes por dentro</em></button>`
-      :`<div class="zv-card"><b>${c.n}</b><span>${c.t}</span></div>`).join("")}</div>
+      ?`<button class="zv-card can${c.n===hl?" zv-hit":""}" data-i="${i}"><b>${c.n}</b><span>${c.t}</span><em>${ICON_LENS}${c.kids} partes por dentro</em></button>`
+      :`<div class="zv-card${c.n===hl?" zv-hit":""}"><b>${c.n}</b><span>${c.t}</span></div>`).join("")}</div>
   </div>`;
   st.querySelectorAll(".zv-card.can").forEach(c=>c.onclick=()=>zoomTo([...path,+c.dataset.i],c));
   return st;
@@ -556,6 +565,12 @@ function clipFrom(r, box){
   return `inset(${r.top-box.top}px ${box.right-r.right}px ${box.bottom-r.bottom}px ${r.left-box.left}px round 14px)`;
 }
 const Z_EASE={duration:480,easing:"cubic-bezier(.2,.75,.2,1)"};
+/* retângulo da peça na tela; se ela estiver fora (a rolagem ainda não chegou), o zoom parte do centro */
+function nodeRect(id){
+  const r=el[id].getBoundingClientRect(), vw=innerWidth, vh=innerHeight;
+  if(r.bottom>0&&r.top<vh&&r.right>0&&r.left<vw) return r;
+  return {top:vh*.4,bottom:vh*.6,left:vw*.4,right:vw*.6};
+}
 /* limpa depois da animação; o temporizador garante a limpeza se o evento de fim não vier */
 function after(anim, ms, fn){
   let done=false; const run=()=>{ if(!done){ done=true; fn(); } };
@@ -566,16 +581,19 @@ function zShow(path, st){
   zv.className="zv l"+(layerIdx[N[path[0]].l]+1);
   st.querySelector("h2").focus({preventScroll:true});
 }
-function openZoom(path){
+/* hl: nome do cartão a destacar, quando o zoom é aberto pela busca */
+function openZoom(path, hl){
   if(!validPath(path)) return;
   if(zv.open){ zoomTo(path); return; }
   if(jr.on) stopJourney();
-  const st=zStage(path); zvBody.replaceChildren(st);
+  const st=zStage(path, hl); zvBody.replaceChildren(st);
   zv.showModal(); zShow(path, st);
   if(!reduce){
-    const r=el[path[0]].getBoundingClientRect(), box=zv.getBoundingClientRect();
-    zv.animate([{clipPath:clipFrom(r,box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE);
+    const r=nodeRect(path[0]), box=zv.getBoundingClientRect();
+    const a=zv.animate([{clipPath:clipFrom(r,box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE);
+    after(a, Z_EASE.duration, ()=>a.cancel());
   }
+  const hit=st.querySelector(".zv-hit"); if(hit) hit.scrollIntoView({block:"center",behavior:"auto"});
 }
 function zoomTo(path, fromEl){
   const old=zvBody.lastElementChild, st=zStage(path);
@@ -583,8 +601,8 @@ function zoomTo(path, fromEl){
   if(reduce||!fromEl){ zvBody.replaceChildren(st); return; }
   const box=st.getBoundingClientRect();
   old.animate([{opacity:1,transform:"scale(1)"},{opacity:0,transform:"scale(1.06)"}],{duration:380,easing:"ease-in",fill:"forwards"});
-  after(st.animate([{clipPath:clipFrom(fromEl.getBoundingClientRect(),box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE),
-    Z_EASE.duration, ()=>{ if(old.isConnected) old.remove(); });
+  const a=st.animate([{clipPath:clipFrom(fromEl.getBoundingClientRect(),box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE);
+  after(a, Z_EASE.duration, ()=>{ a.cancel(); if(old.isConnected) old.remove(); });
 }
 function zoomUp(depth){
   if(depth<=0){ closeZoom(); return; }
@@ -601,7 +619,7 @@ function closeZoom(now){
   const id=zpath[0], done=()=>{ zv.close(); zvBody.replaceChildren(); zpath=[]; setHash(state.sel||null); };
   if(now||reduce||!el[id]){ done(); return; }
   const box=zv.getBoundingClientRect();
-  const anim=zv.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clipFrom(el[id].getBoundingClientRect(),box)}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
+  const anim=zv.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clipFrom(nodeRect(id),box)}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
   after(anim, 380, ()=>{ done(); anim.cancel(); });
 }
 document.getElementById("zvClose").onclick=()=>closeZoom();
@@ -611,7 +629,7 @@ zv.addEventListener("cancel",e=>{ e.preventDefault(); zoomUp(zpath.length-1); })
 /* ---------- deep link: #id abre a peça; #falha-id derruba; #zoom-id-1-2 abre o zoom ---------- */
 function fromHash(){
   const id=decodeURIComponent(location.hash.slice(1));
-  const zm=id.match(/^zoom-([a-z]+)((?:-\d+){0,2})$/);
+  const zm=id.match(/^zoom-([a-z][a-z0-9]*)((?:-\d+){0,2})$/);
   if(zm){
     const path=[zm[1],...zm[2].split("-").filter(Boolean).map(Number)];
     if(validPath(path)){ if(state.sel!==path[0]) goTo(path[0]); openZoom(path); }

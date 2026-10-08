@@ -492,7 +492,7 @@ function failReport(id,r){
 }
 
 /* ---------- zoom dentro do zoom ---------- */
-const zv=document.getElementById("zoomView"), zvCrumbs=document.getElementById("zvCrumbs"), zvBody=document.getElementById("zvBody");
+const zv=document.getElementById("zoomView"), zvCrumbs=document.getElementById("zvCrumbs"), zvBody=document.getElementById("zvBody"), zvBack=document.getElementById("zvBack");
 let zpath=[];
 
 /* o conteúdo de um nível: [peça], [peça, item], [peça, item, subitem] */
@@ -531,6 +531,10 @@ function zCrumbs(path){
   zvCrumbs.innerHTML=`<button data-up="0">Mapa</button>`+names.map((n,i)=>i===names.length-1
     ?`<span aria-current="page">${n}</span>`:`<button data-up="${i+1}">${n}</button>`).join("");
   zvCrumbs.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>zoomUp(+b.dataset.up));
+  /* um nível acima; no primeiro nível, volta ao mapa */
+  const up=path.length>1?names[names.length-2]:"o mapa";
+  zvBack.setAttribute("aria-label",`Voltar para ${up}`);
+  zvBack.querySelector("span").textContent=path.length>1?"Voltar":"Voltar ao mapa";
 }
 /* recorte que começa no retângulo de origem e abre até a tela inteira */
 function clipFrom(r, box){
@@ -586,6 +590,7 @@ function closeZoom(now){
   after(anim, 380, ()=>{ done(); anim.cancel(); });
 }
 document.getElementById("zvClose").onclick=()=>closeZoom();
+zvBack.onclick=()=>zoomUp(zpath.length-1);
 zv.addEventListener("cancel",e=>{ e.preventDefault(); zoomUp(zpath.length-1); });
 
 /* ---------- deep link: #id abre a peça; #falha-id derruba; #zoom-id-1-2 abre o zoom ---------- */

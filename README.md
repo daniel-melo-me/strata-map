@@ -165,3 +165,5 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 ---
 
 **Strata Map** — veja o software camada por camada.
+
+Criado por **Daniel Melo** · [GitHub](https://github.com/daniel-melo-me) · [LinkedIn](https://www.linkedin.com/in/daniel--melo/) · [dancode.com.br](https://www.dancode.com.br/)

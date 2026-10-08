@@ -36,6 +36,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `assets/js/data/base.js`: camadas, personas e eixos, comuns a todos os estilos.
 - `assets/js/data/microsservicos.js`: peças, conexões, jornada e falhas do estilo microsserviços.
 - `assets/js/data/monolito.js`: o mesmo para o monólito. Reaproveita as peças comuns de microsservicos.js com `pick(id, ajustes)`, então precisa carregar depois dele.
+- `assets/js/data/zoom.js`: zoom dentro do zoom, em `STRATA.zoom[idDaPeça][nome do item do inside]` = `{what, ex?: [rótulo, código], kids: [[nome, texto, nível3?]]}`. Vale para os dois estilos, pela chave id + nome do item. Até 3 níveis.
 - `assets/js/failure.js`: cálculo da cascata do modo falha (função pura, testável no Node).
 - `assets/js/search.js`: busca rápida (função pura, testável no Node): pesos por campo, sem acentos, apelidos como k8s e db.
 - `assets/js/app.js`: render do mapa, painel, filtros, jornada, modo falha e caixa de busca.
@@ -47,6 +48,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - "Disparar um clique": passos narrados com contador de milissegundos.
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
 - Modo falha: derrubar uma peça mostra quem para, degrada, congela ou segura o tranco, e se o usuário percebe. Chave "Com redundância" (ligada = produção real; desligada = cascata inteira). Link direto `#falha-<id>`. O relatório compara com a mesma queda nos outros estilos.
+- Zoom dentro do zoom: botão "Entrar na peça" no painel (ou clique num item do "por dentro"). Tela cheia na cor da camada, cartões que abrem até 3 níveis, trilha para voltar, Esc sobe um nível, link `#zoom-<id>-<item>-<subitem>`. Peças com zoom ganham uma lupa no mapa. Conteúdo hoje: navegador, dns, tls, pedidos, app (processo), kafka, oltp, container, k8s, servidor.
 - Busca rápida: ⌘K, Ctrl+K ou /. Procura em nome, tecnologias, "por dentro", descrição, onde roda, camada e "se cair"; mostra o trecho que explica o resultado e, para termos que só existem em outro estilo, leva até ele.
 - Pacotes ambientes circulando nas conexões; respeita `prefers-reduced-motion`; tema claro e escuro.
 - Tipografia: Bricolage Grotesque (títulos), Source Sans 3 (corpo) e JetBrains Mono (rótulos técnicos, números de camada, milissegundos). Faixas escurecem conforme a profundidade, como um corte de terreno.
@@ -57,7 +59,7 @@ Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra 
 ## Próximos passos levantados
 
 - Outros estilos arquiteturais: event-driven, hexagonal, serverless.
-- Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça.
+- Zoom nas demais peças (o padrão está pronto; falta conteúdo).
 - Validação de conformidade (adiada): requisitos por arquitetura com peso (inegociáveis, estruturais, operação), gerando score de aptidão e lista de lacunas.
 - Linha do tempo da evolução das arquiteturas, custo e trade-off por peça.
 - Eixo de processo ágil (discovery, refinamento, sprint, review, retro).

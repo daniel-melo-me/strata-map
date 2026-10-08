@@ -115,6 +115,14 @@
   <p class="search-foot"><span><kbd>↑</kbd><kbd>↓</kbd> escolher</span><span><kbd>Enter</kbd> abrir</span><span><kbd>Esc</kbd> fechar</span></p>
 </dialog>
 
+<dialog class="zv" id="zoomView" aria-label="Zoom dentro da peça">
+  <div class="zv-bar">
+    <nav class="zv-crumbs" id="zvCrumbs" aria-label="Onde você está"></nav>
+    <button class="close" id="zvClose" aria-label="Sair do zoom">×</button>
+  </div>
+  <div class="zv-body" id="zvBody"></div>
+</dialog>
+
 <div class="narr" id="narr" role="status">
   <div class="meta"><span id="nStep"></span><span id="nMs"></span></div>
   <div class="bar"><i id="nBar"></i></div>
@@ -130,6 +138,7 @@
 <script src="assets/js/data/base.js"></script>
 <script src="assets/js/data/microsservicos.js"></script>
 <script src="assets/js/data/monolito.js"></script>
+<script src="assets/js/data/zoom.js"></script>
 <script src="assets/js/failure.js"></script>
 <script src="assets/js/search.js"></script>
 <script src="assets/js/app.js"></script>

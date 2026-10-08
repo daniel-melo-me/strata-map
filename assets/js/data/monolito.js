@@ -234,7 +234,7 @@ satelite:pick("satelite")
    fibra:["provedor","O provedor desvia o tráfego por outra rota, mais longa: fica um pouco mais lento.","degrada"],
    lb:[null,"Balanceadores trabalham em par: se um cai, o outro assume.","nada"],
    externas:["pagamentos","Circuit breaker e fila de retentativa: os pagamentos ficam pendentes e são tentados de novo quando o parceiro volta.","degrada"],
-   oltp:[null,"A réplica em outra zona é promovida a principal. As escritas falham por alguns segundos e voltam.","degrada"],
+   oltp:[null,"A réplica em outra zona é promovida a principal. As escritas falham durante a troca, que em serviços gerenciados leva de segundos a um ou dois minutos, e voltam.","degrada"],
    container:[null,"A nova imagem não passa no health check e as cópias antigas seguem no ar.","nada"],
    vm:["lb","O balanceador tira a VM do rodízio e as outras cópias atendem; a autoescala sobe uma nova.","nada"],
    servidor:[null,"O provedor de nuvem reinicia as VMs em outro servidor, e as outras cópias do monólito atendem enquanto isso.","nada"],

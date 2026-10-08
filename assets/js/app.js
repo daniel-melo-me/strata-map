@@ -1,4 +1,4 @@
-/* Strata Map: render do mapa, painel de detalhes, eixos, personas, jornada, modo falha e busca.
+/* Strata Map: render do mapa, painel de detalhes, eixos, personas, jornada, modo falha, busca e zoom.
  * Os dados vêm de assets/js/data/ (window.STRATA). */
 (function(){
 const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
@@ -6,6 +6,11 @@ const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
 const askedStyle=new URLSearchParams(location.search).get("estilo");
 const STYLE_ID=styles[askedStyle]?askedStyle:Object.keys(styles)[0], STYLE=styles[STYLE_ID];
 const N=STYLE.nodes, E=STYLE.edges, JOURNEY=STYLE.journey;
+/* zoom dentro do zoom (data/zoom.js): uma peça tem zoom se algum item do "por dentro" tem */
+const Z=STRATA.zoom||{};
+const zoomOf=(id,name)=>Z[id]&&Z[id][name]||null;
+const hasZoom=id=>(N[id].inside||[]).some(([n])=>zoomOf(id,n));
+const ICON_LENS=`<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M11 11l3.5 3.5M7 4.5v5M4.5 7h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`;
 
 /* ---------- render ---------- */
 const map=document.getElementById("map"), wires=document.getElementById("wires"), packets=document.getElementById("packets");
@@ -70,7 +75,7 @@ LAYERS.forEach((L,i)=>{
   Object.entries(N).filter(([,v])=>v.l===L.id).forEach(([id,v])=>{
     const b=document.createElement("button"); b.className="node"; b.dataset.id=id;
     Object.keys(v.ax||{}).forEach(k=>b.classList.add("ax-"+k));
-    b.innerHTML=`<i class="ax-dot"></i><i class="f-badge"></i><b>${v.n}</b><span>${v.t}</span>`;
+    b.innerHTML=`<i class="ax-dot"></i><i class="f-badge"></i><b>${v.n}</b><span>${v.t}</span>${hasZoom(id)?`<i class="z-mark" title="Tem zoom por dentro">${ICON_LENS}</i>`:""}`;
     b.addEventListener("click",()=>fail.on?breakNode(id):state.sel===id?closePanel():select(id));
     nodes.appendChild(b); el[id]=b;
   });
@@ -174,7 +179,10 @@ function select(id){
   panel.innerHTML=`<button class="close" aria-label="Fechar">×</button>
    <span class="layer-tag">Camada ${layerIdx[v.l]+1}: ${L.n}</span>
    <h3>${v.n}</h3><p class="what">${v.what}</p>
-   <h4>Por dentro</h4><ul class="zoom">${v.inside.map(s=>`<li><b>${s[0]}</b><span>${s[1]}</span></li>`).join("")}</ul>
+   <h4 class="h-zoom">Por dentro${hasZoom(id)?`<button class="btn-zoom" data-zoom>${ICON_LENS}Entrar na peça</button>`:""}</h4>
+   <ul class="zoom">${v.inside.map((s,i)=>zoomOf(id,s[0])
+     ?`<li><button class="zoom-item" data-zi="${i}"><b>${s[0]}</b><span>${s[1]}</span><i aria-hidden="true">→</i></button></li>`
+     :`<li><b>${s[0]}</b><span>${s[1]}</span></li>`).join("")}</ul>
    ${v.tech?`<h4>Tecnologias reais</h4><div class="tags">${v.tech.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:""}
    ${v.host?`<h4>Onde pode rodar</h4><p>${v.host}</p>`:""}
    <h4>Quem cuida</h4><div class="row who">${(v.who||[]).map(p=>`<button class="chip" data-persona="${p}" aria-pressed="${state.persona===p}">${PERSONAS[p][0]}</button>`).join("")}</div>
@@ -183,6 +191,8 @@ function select(id){
    ${axn?`<h4>Eixos que passam por aqui</h4>${axn}`:""}
    ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}`;
   panel.querySelector(".close").onclick=closePanel;
+  const zb=panel.querySelector("[data-zoom]"); if(zb) zb.onclick=()=>openZoom([id]);
+  panel.querySelectorAll("[data-zi]").forEach(b=>b.onclick=()=>openZoom([id,+b.dataset.zi]));
   const brk=panel.querySelector("[data-break]"); if(brk) brk.onclick=()=>breakNode(id);
   panel.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>goTo(b.dataset.go));
   panel.querySelectorAll("[data-persona]").forEach(b=>b.onclick=()=>setPersona(state.persona===b.dataset.persona?null:b.dataset.persona));
@@ -293,7 +303,7 @@ nPause.onclick=()=>{
     if(jr.i<LAST) showStep(jr.i+1); else finish();
   }else{setPaused(true); clearTimers();}
 };
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!search.open){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!search.open&&!zv.open){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
 
 /* ---------- busca (⌘K, Ctrl+K ou /) ---------- */
 const search=document.getElementById("search"), q=document.getElementById("q"), results=document.getElementById("results");
@@ -351,6 +361,7 @@ function choose(i){
   const h=hits[i]; if(!h) return;
   search.close();
   if(h.href){location.href=h.href; return;}
+  if(zv.open) closeZoom(true);
   if(fail.on) exitFail();
   goTo(h.id);
 }
@@ -478,9 +489,112 @@ function failReport(id,r){
   bindRed(); panel.scrollTop=0;
 }
 
-/* ---------- deep link: #id abre a peça; #falha-id derruba ---------- */
+/* ---------- zoom dentro do zoom ---------- */
+const zv=document.getElementById("zoomView"), zvCrumbs=document.getElementById("zvCrumbs"), zvBody=document.getElementById("zvBody");
+let zpath=[];
+
+/* o conteúdo de um nível: [peça], [peça, item], [peça, item, subitem] */
+function zLevel(path){
+  const [id,i1,i2]=path, v=N[id];
+  if(path.length===1) return {title:v.n, what:v.what,
+    cards:v.inside.map(([n,t])=>{const z=zoomOf(id,n); return {n,t,kids:z?z.kids.length:0};})};
+  const l2=zoomOf(id,v.inside[i1][0]);
+  if(path.length===2) return {title:v.inside[i1][0], what:l2.what, ex:l2.ex,
+    cards:l2.kids.map(([n,t,sub])=>({n,t,kids:sub?sub.kids.length:0}))};
+  const k=l2.kids[i2];
+  return {title:k[0], what:k[2].what, ex:k[2].ex, cards:k[2].kids.map(([n,t])=>({n,t,kids:0}))};
+}
+function validPath(p){
+  try{ if(!N[p[0]]) return false; const L=zLevel(p); return !!(L&&L.what); }catch(_){ return false; }
+}
+function zStage(path){
+  const L=zLevel(path), v=N[path[0]], li=layerIdx[v.l]+1;
+  const st=document.createElement("div"); st.className="zv-stage";
+  st.innerHTML=`<div class="zv-in">
+    <p class="zv-depth">Camada ${li} · ${LAYERS[li-1].n}<span class="zv-dots" aria-label="Nível ${path.length} de 3">${[1,2,3].map(n=>`<i class="${n<=path.length?"on":""}"></i>`).join("")}</span></p>
+    <h2 tabindex="-1">${L.title}</h2>
+    <p class="zv-what">${L.what}</p>
+    ${L.ex?`<figure class="zv-ex"><figcaption>${esc(L.ex[0])}</figcaption><pre><code>${esc(L.ex[1])}</code></pre></figure>`:""}
+    <div class="zv-grid">${L.cards.map((c,i)=>c.kids
+      ?`<button class="zv-card can" data-i="${i}"><b>${c.n}</b><span>${c.t}</span><em>${ICON_LENS}${c.kids} partes por dentro</em></button>`
+      :`<div class="zv-card"><b>${c.n}</b><span>${c.t}</span></div>`).join("")}</div>
+  </div>`;
+  st.querySelectorAll(".zv-card.can").forEach(c=>c.onclick=()=>zoomTo([...path,+c.dataset.i],c));
+  return st;
+}
+function zCrumbs(path){
+  const v=N[path[0]], names=[v.n];
+  if(path.length>1) names.push(v.inside[path[1]][0]);
+  if(path.length>2) names.push(zoomOf(path[0],v.inside[path[1]][0]).kids[path[2]][0]);
+  zvCrumbs.innerHTML=`<button data-up="0">Mapa</button>`+names.map((n,i)=>i===names.length-1
+    ?`<span aria-current="page">${n}</span>`:`<button data-up="${i+1}">${n}</button>`).join("");
+  zvCrumbs.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>zoomUp(+b.dataset.up));
+}
+/* recorte que começa no retângulo de origem e abre até a tela inteira */
+function clipFrom(r, box){
+  return `inset(${r.top-box.top}px ${box.right-r.right}px ${box.bottom-r.bottom}px ${r.left-box.left}px round 14px)`;
+}
+const Z_EASE={duration:480,easing:"cubic-bezier(.2,.75,.2,1)"};
+/* limpa depois da animação; o temporizador garante a limpeza se o evento de fim não vier */
+function after(anim, ms, fn){
+  let done=false; const run=()=>{ if(!done){ done=true; fn(); } };
+  anim.finished.then(run, run); setTimeout(run, ms+80);
+}
+function zShow(path, st){
+  zpath=path; zCrumbs(path); setHash("zoom-"+path.join("-"));
+  zv.className="zv l"+(layerIdx[N[path[0]].l]+1);
+  st.querySelector("h2").focus({preventScroll:true});
+}
+function openZoom(path){
+  if(!validPath(path)) return;
+  if(zv.open){ zoomTo(path); return; }
+  if(jr.on) stopJourney();
+  const st=zStage(path); zvBody.replaceChildren(st);
+  zv.showModal(); zShow(path, st);
+  if(!reduce){
+    const r=el[path[0]].getBoundingClientRect(), box=zv.getBoundingClientRect();
+    zv.animate([{clipPath:clipFrom(r,box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE);
+  }
+}
+function zoomTo(path, fromEl){
+  const old=zvBody.lastElementChild, st=zStage(path);
+  zvBody.appendChild(st); zShow(path, st);
+  if(reduce||!fromEl){ zvBody.replaceChildren(st); return; }
+  const box=st.getBoundingClientRect();
+  old.animate([{opacity:1,transform:"scale(1)"},{opacity:0,transform:"scale(1.06)"}],{duration:380,easing:"ease-in",fill:"forwards"});
+  after(st.animate([{clipPath:clipFrom(fromEl.getBoundingClientRect(),box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE),
+    Z_EASE.duration, ()=>{ if(old.isConnected) old.remove(); });
+}
+function zoomUp(depth){
+  if(depth<=0){ closeZoom(); return; }
+  const target=zpath.slice(0,depth), child=zpath[depth];
+  const cur=zvBody.lastElementChild, st=zStage(target);
+  zvBody.insertBefore(st, cur); zShow(target, st);
+  if(reduce){ cur.remove(); return; }
+  const card=st.querySelector(`.zv-card[data-i="${child}"]`), box=cur.getBoundingClientRect();
+  const to=card?clipFrom(card.getBoundingClientRect(),box):"inset(50% 50% 50% 50% round 14px)";
+  after(cur.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:to}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"}),
+    380, ()=>cur.remove());
+}
+function closeZoom(now){
+  const id=zpath[0], done=()=>{ zv.close(); zvBody.replaceChildren(); zpath=[]; setHash(state.sel||null); };
+  if(now||reduce||!el[id]){ done(); return; }
+  const box=zv.getBoundingClientRect();
+  const anim=zv.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clipFrom(el[id].getBoundingClientRect(),box)}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
+  after(anim, 380, ()=>{ done(); anim.cancel(); });
+}
+document.getElementById("zvClose").onclick=()=>closeZoom();
+zv.addEventListener("cancel",e=>{ e.preventDefault(); zoomUp(zpath.length-1); });
+
+/* ---------- deep link: #id abre a peça; #falha-id derruba; #zoom-id-1-2 abre o zoom ---------- */
 function fromHash(){
   const id=decodeURIComponent(location.hash.slice(1));
+  const zm=id.match(/^zoom-([a-z]+)((?:-\d+){0,2})$/);
+  if(zm){
+    const path=[zm[1],...zm[2].split("-").filter(Boolean).map(Number)];
+    if(validPath(path)){ if(state.sel!==path[0]) goTo(path[0]); openZoom(path); }
+    return;
+  }
   if(id.startsWith("falha-")&&N[id.slice(6)]&&STYLE.failure) breakNode(id.slice(6));
   else if(N[id]&&state.sel!==id) goTo(id);
 }

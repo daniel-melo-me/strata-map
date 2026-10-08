@@ -28,8 +28,8 @@ STRATA.simulateFailure=function(style, root, redundancy){
 
   while(queue.length){
     const x=queue.shift(), px=prop[x], w=out[x].wave+1;
-    deps.forEach(([a, b, eff, why])=>{
-      if(b!==x || a===root) return;
+    deps.forEach(([a, b, eff, why, onlyRoot])=>{
+      if(b!==x || a===root || (onlyRoot && x!==root)) return;
       const held=out[a] && out[a].s==="hold";
       if(px==="stop"){
         if(eff==="para") mark(a, "stop", x, why, w);

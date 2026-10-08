@@ -7,6 +7,7 @@ window.STRATA = window.STRATA || { styles: {} };
 
 STRATA.styles.microsservicos={
  name:"microsserviços",
+ desc:"Cada parte do negócio é um serviço independente, com deploy e banco próprios, conversando pela rede. Escala e evolui por partes; cobra o preço em operação e em chamadas de rede.",
  nodes:{
 /* EXPERIÊNCIA */
 usuario:{l:"exp",n:"Usuário",t:"Alguém com uma intenção",
@@ -311,6 +312,7 @@ satelite:{l:"fis",n:"Satélite",t:"Internet vinda do espaço",
   *         fila    = a dependência é a fila: se ela cai, o dependente fica sem eventos;
   *                   se o dependente cai, a fila guarda o que não foi entregue
   *         muda    = só mudanças param (deploy, escala, infra); o que já roda continua
+  *         5º campo opcional "raiz": a dependência só vale quando a dependência é a peça derrubada
   * guards: com redundância ligada, quem segura a queda da peça: [peça que absorve ou null, texto, efeito nos dependentes]
   *         efeito "nada" = ninguém percebe; "degrada" = interrupção curta ou lentidão
   */

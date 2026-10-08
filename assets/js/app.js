@@ -2,7 +2,9 @@
  * Os dados vêm de assets/js/data/ (window.STRATA). */
 (function(){
 const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
-const STYLE=Object.values(styles)[0];
+/* estilo escolhido pela URL (?estilo=monolito); sem parâmetro, o primeiro registrado */
+const askedStyle=new URLSearchParams(location.search).get("estilo");
+const STYLE_ID=styles[askedStyle]?askedStyle:Object.keys(styles)[0], STYLE=styles[STYLE_ID];
 const N=STYLE.nodes, E=STYLE.edges, JOURNEY=STYLE.journey;
 
 /* ---------- render ---------- */
@@ -13,7 +15,11 @@ const layerIdx={}; LAYERS.forEach((l,i)=>layerIdx[l.id]=i);
 const el={};
 const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-document.getElementById("styleName").textContent=STYLE.name;
+const styleSel=document.getElementById("styleSel");
+Object.entries(styles).forEach(([id,s])=>styleSel.add(new Option(s.name,id,false,id===STYLE_ID)));
+styleSel.onchange=()=>{
+  const u=new URL(location.href); u.searchParams.set("estilo",styleSel.value); u.hash=""; location.href=u.href;
+};
 const totalMs=JOURNEY.reduce((a,x)=>a+x[3],0);
 document.getElementById("playHint").textContent=`${JOURNEY.length} passos em ~${totalMs} ms`;
 const pad=n=>String(n).padStart(2,"0");
@@ -131,18 +137,25 @@ function refresh(){
 }
 
 /* ---------- panel ---------- */
+const LEGEND={
+  net:["","Rede: o caminho físico e de protocolo"],
+  sync:["","Chamada síncrona: pede e espera a resposta"],
+  mem:["","Chamada em memória: função chamando função, sem rede"],
+  async:["7 6","Evento assíncrono: avisa e segue em frente"],
+  run:["2 5","Onde roda: liga o código ao metal"]
+};
 function intro(){
+  const types=new Set(E.map(e=>e[2]));
+  const others=Object.entries(styles).filter(([id])=>id!==STYLE_ID)
+    .map(([id,s])=>`<a class="style-link" href="?estilo=${id}">Ver o mesmo sistema em ${s.name} →</a>`).join("");
   panel.className="panel";
   panel.innerHTML=`<div class="intro">
+   ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p>${others}</div>`:""}
    <h3>Abra qualquer peça</h3>
    <p>Cada caixa tem um mundo dentro. Ao abrir, você vê do que ela é feita, quem cuida dela, com quem conversa e o que acontece se ela cair.</p>
    <h4>Como ler as linhas</h4>
-   <ul class="legend">
-    <li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-net)" stroke-width="3"/></svg>Rede: o caminho físico e de protocolo</li>
-    <li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-sync)" stroke-width="3"/></svg>Chamada síncrona: pede e espera a resposta</li>
-    <li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-async)" stroke-width="3" stroke-dasharray="7 6"/></svg>Evento assíncrono: avisa e segue em frente</li>
-    <li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-run)" stroke-width="3" stroke-dasharray="2 5"/></svg>Onde roda: liga o código ao metal</li>
-   </ul>
+   <ul class="legend">${Object.entries(LEGEND).filter(([k])=>types.has(k)).map(([k,[dash,txt]])=>
+    `<li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-${k})" stroke-width="3"${dash?` stroke-dasharray="${dash}"`:""}/></svg>${txt}</li>`).join("")}</ul>
    <h4>Quanto mais fundo, mais longe do usuário</h4>
    <p>O número de cada faixa é a profundidade. A camada 1 é o que a pessoa vê. A 9 é o meio físico: luz na fibra, eletricidade no cobre e ondas no ar.</p></div>`;
 }
@@ -230,7 +243,7 @@ function send(a,b,color,dur,r){
   });
 }
 /* ambient life */
-const COLORS={net:"var(--w-net)",sync:"var(--w-sync)",async:"var(--w-async)",run:"var(--w-run)"};
+const COLORS={net:"var(--w-net)",sync:"var(--w-sync)",mem:"var(--w-mem)",async:"var(--w-async)",run:"var(--w-run)"};
 function ambient(){
   if(reduce||jr.on||fail.on||document.hidden) return;
   const pool=E.filter(e=>e[2]!=="run"||state.runs);
@@ -291,7 +304,7 @@ const F_USER={
   degr:"O usuário percebe: algo fica lento, falha ou chega atrasado.",
   ok:"O usuário nem percebe."
 };
-const F_SAMPLES=["oltp","kafka","notificacoes","k8s","dns","datacenter"];
+const F_SAMPLES=(STYLE.failure&&STYLE.failure.samples)||["oltp","kafka","notificacoes","k8s","dns","datacenter"];
 const fail={on:false,root:null,red:true,timers:[]};
 const failBtn=document.getElementById("failBtn");
 if(!STYLE.failure) failBtn.hidden=true;
@@ -367,11 +380,17 @@ function failReport(id,r){
       <ul class="f-list">${items.map(([k,x])=>`<li><button data-go="${k}"><b>${N[k].n}</b><span>${x.why}</span></button></li>`).join("")}</ul>`;
   }).join("");
   const res=v.ax&&v.ax.res;
+  /* a mesma queda nos outros estilos que têm essa peça */
+  const compare=Object.entries(styles).filter(([sid,s])=>sid!==STYLE_ID&&s.failure&&s.nodes[id]).map(([sid,s])=>{
+    const u=STRATA.simulateFailure(s,id,fail.red).user;
+    return `<a class="f-compare f-u-${u}" href="?estilo=${sid}#falha-${id}"><span>E em ${s.name}?</span>${F_USER[u]} <b>Ver →</b></a>`;
+  }).join("");
   panel.className="panel open l"+(layerIdx[v.l]+1);
   panel.innerHTML=`<button class="close" aria-label="Sair do modo falha">×</button>
    <span class="layer-tag f-tag">Modo falha · Camada ${layerIdx[v.l]+1}</span>
    <h3>${v.n} caiu</h3>
    <div class="f-verdict f-u-${r.user}">${F_USER[r.user]}</div>
+   ${compare}
    ${redSwitch()}
    ${g?(fail.red?`<div class="f-guard"><b>Quem segura:</b> ${g[1]}</div>`:`<p class="f-note">Sem redundância, nada segura a queda. Ligue a chave para ver como a produção se protege.</p>`)
       :`<p class="f-note">Aqui a redundância não evita a queda: o cenário é a peça inteira fora do ar.</p>`}

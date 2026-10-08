@@ -49,6 +49,15 @@ Ao tocar em qualquer componente, você vê:
 
 ## ✨ Recursos
 
+### 🏛️ Dois estilos arquiteturais
+
+Escolha o estilo no topo da página e veja o mesmo sistema montado de outro jeito:
+
+- **Microsserviços:** cada parte do negócio é um serviço independente, com deploy e banco próprios, conversando pela rede.
+- **Monólito:** um único programa com todos os módulos dentro. Os módulos se chamam em memória, sem rede, e dividem um banco só.
+
+As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e o que cai junto no modo falha. O estilo fica no link: `?estilo=monolito`.
+
 ### ▶️ A jornada de um clique
 
 Acompanhe uma requisição real atravessando todas as camadas, em 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo, chegando a cerca de **200 milissegundos**.
@@ -56,6 +65,8 @@ Acompanhe uma requisição real atravessando todas as camadas, em 24 passos narr
 ### ⚡ Modo falha
 
 Derrube qualquer peça e veja a cascata: quem para junto, quem só degrada, quem congela (o que roda continua, só as mudanças param) e quem segura o tranco, como a fila que guarda os eventos até o consumidor voltar. No fim, o veredito: o usuário percebe ou não?
+
+Cada queda também mostra o que aconteceria no outro estilo: no monólito, um módulo com vazamento de memória derruba o processo inteiro; em microsserviços, a mesma falha só degrada.
 
 A chave **Com redundância** mostra a produção real, com réplicas, failover e várias zonas. Desligada, mostra a cascata inteira e por que a redundância existe. Cada cenário tem link direto: `#falha-oltp` abre o mapa com o banco relacional derrubado.
 
@@ -118,7 +129,8 @@ Cada peça tem link direto: `index.html#pedidos` abre o mapa já com o serviço 
 index.html                     estrutura da página
 assets/css/styles.css          estilos, temas claro e escuro
 assets/js/data/base.js         camadas, personas e eixos (comuns a todos os estilos)
-assets/js/data/microsservicos.js  peças, conexões e jornada do estilo microsserviços
+assets/js/data/microsservicos.js  peças, conexões, jornada e falhas do estilo microsserviços
+assets/js/data/monolito.js     o mesmo para o monólito, reaproveitando as peças comuns
 assets/js/failure.js           cálculo da cascata do modo falha
 assets/js/app.js               render do mapa, painel, filtros, jornada e modo falha
 ```
@@ -129,7 +141,8 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 
 ## 🛣️ Próximos passos
 
-- [ ] Novos estilos arquiteturais: event-driven, hexagonal, serverless e monólito
+- [x] Segundo estilo arquitetural: monólito
+- [ ] Novos estilos arquiteturais: event-driven, hexagonal e serverless
 - [ ] Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça
 - [ ] Validação de conformidade: checar se uma aplicação está apta a uma arquitetura
 - [ ] Linha do tempo: como as arquiteturas evoluíram, e por quê

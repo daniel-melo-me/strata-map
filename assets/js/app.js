@@ -22,6 +22,20 @@ const layerIdx={}; LAYERS.forEach((l,i)=>layerIdx[l.id]=i);
 const el={};
 const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/* tema: sistema, claro ou escuro; a escolha fica guardada no navegador */
+const THEME_KEY="strata-theme", themeBtns=[...document.querySelectorAll("[data-theme-opt]")];
+const themeMetas=[...document.querySelectorAll('meta[name="theme-color"]')], THEME_BG={light:"#F7F8FA",dark:"#0B1015"};
+function applyTheme(t){
+  const root=document.documentElement;
+  if(t==="light"||t==="dark") root.dataset.theme=t; else{ delete root.dataset.theme; t="system"; }
+  themeBtns.forEach(b=>b.setAttribute("aria-checked",String(b.dataset.themeOpt===t)));
+  /* forçado, a barra do navegador acompanha; no sistema, cada meta vale para o seu modo */
+  themeMetas.forEach(m=>m.setAttribute("content",t==="system"?THEME_BG[/dark/.test(m.media)?"dark":"light"]:THEME_BG[t]));
+  try{ t==="system"?localStorage.removeItem(THEME_KEY):localStorage.setItem(THEME_KEY,t); }catch(_){}
+}
+themeBtns.forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeOpt));
+applyTheme(document.documentElement.dataset.theme||"system");
+
 const styleSel=document.getElementById("styleSel");
 Object.entries(styles).forEach(([id,s])=>styleSel.add(new Option(s.name,id,false,id===STYLE_ID)));
 styleSel.onchange=()=>{

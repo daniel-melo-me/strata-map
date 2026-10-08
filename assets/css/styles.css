@@ -1,3 +1,7 @@
+/* controles nativos (select, dialog, barras de rolagem) seguem o tema */
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 :root{
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -59,6 +63,11 @@ button{font:inherit;color:inherit}
 .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;max-width:1440px;margin:0 auto}
 .logo{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none}
 .logo b{font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em}
+.top-tools{display:flex;align-items:center;gap:10px}
+.theme-switch{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.theme-switch button{display:grid;place-items:center;width:30px;height:28px;border:0;border-radius:999px;background:none;color:var(--ink-2);cursor:pointer;transition:background .15s, color .15s}
+.theme-switch button:hover{color:var(--ink)}
+.theme-switch button[aria-checked="true"]{background:var(--ink);color:var(--paper)}
 .style-pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 4px 4px 12px;background:var(--card)}
 .style-pill select{appearance:none;-webkit-appearance:none;font:inherit;font-size:13px;font-weight:600;color:var(--ink);background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238893A0' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 10px center;border:0;border-radius:999px;padding:4px 28px 4px 12px;cursor:pointer}
 .style-note{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:22px}
@@ -368,6 +377,8 @@ kbd{font-family:var(--mono);font-size:11px;line-height:1;padding:3px 5px;border-
   .top{padding:0 16px}
   .topbar{height:56px}
   .style-pill > span{display:none}
+  .top-tools{gap:6px}
+  .theme-switch button{width:26px;height:26px}
   .style-pill{padding:3px}
   .style-pill select{font-size:12.5px}
   .controls{padding:0 16px}

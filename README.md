@@ -74,6 +74,10 @@ A chave **Com redundância** mostra a produção real, com réplicas, failover e
 
 Toda peça abre por dentro. Em **Entrar na peça**, o mapa dá um zoom e cada parte vira um cartão que pode abrir de novo, até três níveis: Banco relacional › Transações ACID › Isolamento. Alguns níveis trazem exemplos reais, como o SQL de um índice, uma requisição HTTP, um Dockerfile e um Deployment do Kubernetes. Cada nível tem link direto, como `#zoom-oltp-1-2`.
 
+### 🌗 Tema claro ou escuro
+
+No topo, escolha entre o tema do sistema, claro ou escuro. A escolha fica guardada para a próxima visita.
+
 ### 🔎 Busca rápida
 
 Aperte **⌘K** (ou **Ctrl+K**, ou **/**) e digite uma peça, tecnologia ou conceito: Kafka, JWT, Redis, failover. A busca ignora acentos, entende apelidos como k8s e db e mostra por que cada peça apareceu. Se o termo só existe no outro estilo, ela leva até lá.

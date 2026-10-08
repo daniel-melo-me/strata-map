@@ -42,14 +42,15 @@ styleSel.onchange=()=>{
   const u=new URL(location.href); u.searchParams.set("estilo",styleSel.value); u.hash=""; location.href=u.href;
 };
 const totalMs=JOURNEY.reduce((a,x)=>a+x[3],0);
-document.getElementById("playHint").textContent=`${JOURNEY.length} passos em ~${totalMs} ms`;
+document.getElementById("playHint").textContent=`A jornada: ${JOURNEY.length} passos, do toque à resposta, em ~${totalMs} ms.`;
 const pad=n=>String(n).padStart(2,"0");
 
 /* testemunho: as camadas em miniatura, como uma amostra de solo */
 const core=document.getElementById("core");
 LAYERS.forEach((L,i)=>{
   const li=document.createElement("li"); li.className="l"+(i+1);
-  li.innerHTML=`<button><span class="depth">${pad(i+1)}</span>${L.n}</button>`;
+  const n=Object.values(N).filter(v=>v.l===L.id).length;
+  li.innerHTML=`<button><span class="depth">${pad(i+1)}</span>${L.n}<span class="count">${n} ${n===1?"peça":"peças"}</span></button>`;
   li.querySelector("button").onclick=()=>focusLayer(i);
   core.appendChild(li);
 });

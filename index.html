@@ -72,13 +72,18 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
       <p class="lede">Um corte do software inteiro, da tela que você toca até os cabos, ondas e satélites que carregam tudo. Toque numa peça para abrir por dentro, ou dispare um clique e acompanhe a viagem.</p>
       <div class="cta">
         <button class="btn-main" data-play><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg>Disparar um clique</button>
-        <span class="cta-hint" id="playHint"></span>
+        <a class="btn-ghost" href="#mapa">Explorar o mapa<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
+      <p class="cta-hint" id="playHint"></p>
     </div>
-    <nav class="core" aria-label="Ir para a camada">
-      <ol id="core"></ol>
-      <span class="core-pulse" aria-hidden="true"></span>
-    </nav>
+    <figure class="core-wrap">
+      <figcaption class="core-cap"><span>↑ Superfície</span><span>o que você vê e toca</span></figcaption>
+      <nav class="core" aria-label="Ir para a camada">
+        <ol id="core"></ol>
+        <span class="core-pulse" aria-hidden="true"></span>
+      </nav>
+      <p class="core-cap"><span>↓ Fundo</span><span>luz, cobre e ondas</span></p>
+    </figure>
   </div>
 </header>
 
@@ -104,7 +109,7 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 <div class="banner" id="banner"></div>
 <p class="persona-line" id="personaLine"></p>
 
-<main class="stage">
+<main class="stage" id="mapa">
   <div class="map" id="map">
     <svg class="wires" id="wires"></svg>
     <svg class="packets" id="packets"></svg>
@@ -133,7 +138,6 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
         </g>
         </svg>
       <div>
-        <p class="cr-eyebrow">Abaixo da camada 9</p>
         <b>Strata Map</b>
         <span>O software por inteiro, do clique à infraestrutura física.</span>
       </div>

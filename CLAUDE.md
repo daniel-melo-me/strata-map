@@ -42,7 +42,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `tools/og-image.html`: fonte do `og.png`, com o comando do Chrome headless para regenerar. Regenerar quando mudar a marca, a tagline ou os estilos citados na imagem.
 
 - 9 camadas: Experiência, Rede e internet, Borda do sistema, Aplicação, Integração e eventos, Dados, Plataforma, Infraestrutura, Físico.
-- Microsserviços: 41 peças, jornada de 24 passos (~188 ms). Monólito: 35 peças (aplicação monolítica, módulos de autenticação, pedidos, pagamentos e notificações, fila de jobs), jornada de 19 passos (~166 ms). Cada peça abre um painel com: o que é, por dentro, tecnologias reais, onde pode rodar, quem cuida, se cair, eixos transversais e conexões.
+- Microsserviços: 41 peças, jornada de 24 passos (~180 ms). Monólito: 35 peças (aplicação monolítica, módulos de autenticação, pedidos, pagamentos e notificações, fila de jobs), jornada de 19 passos (~166 ms). Cada peça abre um painel com: o que é, por dentro, tecnologias reais, onde pode rodar, quem cuida, se cair, eixos transversais e conexões.
 - "Disparar um clique": passos narrados com contador de milissegundos.
 - Toggles: eixos transversais, "Mostrar onde cada coisa roda" (liga serviço → container → pod → Kubernetes → VM → servidor → data center → meio físico) e filtro "Ver pelos olhos de" com 11 personas.
 - Modo falha: derrubar uma peça mostra quem para, degrada, congela ou segura o tranco, e se o usuário percebe. Chave "Com redundância" (ligada = produção real; desligada = cascata inteira). Link direto `#falha-<id>`. O relatório compara com a mesma queda nos outros estilos.

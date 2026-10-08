@@ -159,7 +159,7 @@ satelite:pick("satelite")
  ["pedidos","oltp","Consulta no banco, que guarda as tabelas de todos os módulos. Um índice acha só os pedidos desse cliente.",25],
  ["oltp","pedidos","O banco devolve as linhas, e o ORM as transforma em objetos.",5],
  ["pedidos","app","O módulo devolve os pedidos para quem chamou, de novo sem sair do processo.",0],
- ["app","navegador","O monólito monta a resposta, que volta pelo mesmo caminho: balanceador, fibra, provedor, Wi-Fi. Cifrada o tempo todo.",42],
+ ["app","navegador","O monólito monta a resposta, que volta pelo mesmo caminho: balanceador, fibra, provedor, Wi-Fi. Pela internet, cifrada o tempo todo.",42],
  ["navegador","usuario","A tela mostra os pedidos. Do toque até aqui, cerca de 170 milissegundos: sem saltos de rede entre serviços, o caminho interno fica mais curto.",16]
  ],
 
@@ -237,7 +237,7 @@ satelite:pick("satelite")
    oltp:[null,"A réplica em outra zona é promovida a principal. As escritas falham por alguns segundos e voltam.","degrada"],
    container:[null,"A nova imagem não passa no health check e as cópias antigas seguem no ar.","nada"],
    vm:["lb","O balanceador tira a VM do rodízio e as outras cópias atendem; a autoescala sobe uma nova.","nada"],
-   servidor:[null,"O provedor de nuvem move as VMs para outro servidor.","nada"],
+   servidor:[null,"O provedor de nuvem reinicia as VMs em outro servidor, e as outras cópias do monólito atendem enquanto isso.","nada"],
    datacenter:["regiao","Multi-AZ: as outras zonas da região assumem o tráfego.","nada"],
    regiao:[null,"Multi-AZ: a queda de uma zona é absorvida pelas outras. Perder a região inteira exige um plano de recuperação em outra região.","nada"]
   }

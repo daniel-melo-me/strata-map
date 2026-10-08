@@ -1,7 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#121A23"/>
-  <rect x="6" y="6.5" width="20" height="3.6" rx="1.8" fill="#4A8FE0"/>
-  <rect x="6" y="12" width="20" height="3.6" rx="1.8" fill="#8A63EA"/>
-  <rect x="6" y="17.5" width="20" height="3.6" rx="1.8" fill="#14A08D"/>
-  <rect x="6" y="23" width="20" height="2.8" rx="1.4" fill="#D29572"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <clipPath id="sm-c"><rect width="64" height="64" rx="15"/></clipPath>
+    <linearGradient id="sm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2938"/><stop offset="1" stop-color="#101820"/></linearGradient>
+  </defs>
+  <g clip-path="url(#sm-c)">
+    <rect width="64" height="64" fill="url(#sm-sky)"/>
+    <path d="M0 25 C14 20 30 29 64 22 V64 H0Z" fill="#4A8FE8"/>
+    <path d="M0 35 C16 30 34 39 64 32 V64 H0Z" fill="#8058E8"/>
+    <path d="M0 45 C16 40 36 49 64 42 V64 H0Z" fill="#119C88"/>
+    <path d="M0 55 C18 51 38 58 64 52 V64 H0Z" fill="#B97B5A"/>
+    <path d="M40 15 V64" stroke="#fff" stroke-width="3.4"/>
+    <circle cx="40" cy="14" r="6.5" fill="#fff"/>
+    <circle cx="40" cy="14" r="2.6" fill="#101820"/>
+  </g>
 </svg>

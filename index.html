@@ -19,7 +19,22 @@
 <header class="top">
   <nav class="topbar">
     <a class="logo" href="./" aria-label="Strata Map, início">
-      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="3" width="22" height="4" rx="2" fill="#2F7DD1"/><rect x="2" y="9" width="22" height="4" rx="2" fill="#7A4FE0"/><rect x="2" y="15" width="22" height="4" rx="2" fill="#0F8F7E"/><rect x="2" y="21" width="22" height="3" rx="1.5" fill="#C98B6B"/></svg>
+      <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+      <clipPath id="sm-c"><rect width="64" height="64" rx="15"/></clipPath>
+      <linearGradient id="sm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2938"/><stop offset="1" stop-color="#101820"/></linearGradient>
+      </defs>
+      <g clip-path="url(#sm-c)">
+      <rect width="64" height="64" fill="url(#sm-sky)"/>
+      <path d="M0 25 C14 20 30 29 64 22 V64 H0Z" fill="#4A8FE8"/>
+      <path d="M0 35 C16 30 34 39 64 32 V64 H0Z" fill="#8058E8"/>
+      <path d="M0 45 C16 40 36 49 64 42 V64 H0Z" fill="#119C88"/>
+      <path d="M0 55 C18 51 38 58 64 52 V64 H0Z" fill="#B97B5A"/>
+      <path d="M40 15 V64" stroke="#fff" stroke-width="3.4"/>
+      <circle cx="40" cy="14" r="6.5" fill="#fff"/>
+      <circle cx="40" cy="14" r="2.6" fill="#101820"/>
+      </g>
+      </svg>
       <b>Strata Map</b>
     </a>
     <span class="style-pill">Estilo arquitetural <b id="styleName">microsserviços</b></span>

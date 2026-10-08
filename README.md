@@ -72,9 +72,7 @@ A chave **Com redundância** mostra a produção real, com réplicas, failover e
 
 ### 🔍 Zoom dentro do zoom
 
-As peças com uma lupa abrem por dentro. Em **Entrar na peça**, o mapa dá um zoom e cada parte vira um cartão que pode abrir de novo, até três níveis: Banco relacional › Transações ACID › Isolamento. Alguns níveis trazem exemplos reais, como o SQL de um índice, uma requisição HTTP, um Dockerfile e um Deployment do Kubernetes. Cada nível tem link direto, como `#zoom-oltp-1-2`.
-
-Hoje têm zoom: navegador, DNS, TLS, serviço de pedidos, barramento de eventos, banco relacional, container, Kubernetes, servidor físico e o processo do monólito.
+Toda peça abre por dentro. Em **Entrar na peça**, o mapa dá um zoom e cada parte vira um cartão que pode abrir de novo, até três níveis: Banco relacional › Transações ACID › Isolamento. Alguns níveis trazem exemplos reais, como o SQL de um índice, uma requisição HTTP, um Dockerfile e um Deployment do Kubernetes. Cada nível tem link direto, como `#zoom-oltp-1-2`.
 
 ### 🔎 Busca rápida
 
@@ -159,7 +157,6 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 - [ ] Novos estilos arquiteturais: event-driven, hexagonal e serverless
 - [x] Busca rápida (⌘K)
 - [x] Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça
-- [ ] Zoom nas demais peças
 - [ ] Validação de conformidade: checar se uma aplicação está apta a uma arquitetura
 - [ ] Linha do tempo: como as arquiteturas evoluíram, e por quê
 - [ ] Custo e trade-off por componente

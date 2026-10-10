@@ -116,10 +116,11 @@ tls:{
   ]},
  "TCP ou QUIC":{
   what:"O transporte que leva os bytes cifrados de um lado a outro e garante que cheguem completos e em ordem.",
+  refs:[["CloudPing: latência entre regiões da AWS","https://www.cloudping.co/"]],
   kids:[
    ["TCP","Abre a conexão com três mensagens (SYN, SYN-ACK, ACK), numera os pacotes e reenvia os perdidos."],
    ["QUIC","Roda sobre UDP, traz o TLS embutido e abre a conexão segura em uma ida e volta, ou em nenhuma, se já conversou antes."],
-   ["Ida e volta (RTT)","O tempo de um pacote ir e voltar. Entre São Paulo e a Virgínia, nos EUA, fica perto de 120 ms: cada ida e volta poupada no handshake se sente."]
+   ["Ida e volta (RTT)","O tempo de um pacote ir e voltar. Entre São Paulo e a Virgínia, nos EUA, fica perto de 115 ms: cada ida e volta poupada no handshake se sente."]
   ]}
 },
 
@@ -311,6 +312,7 @@ k8s:{
 servidor:{
  "CPU":{
   what:"O processador executa instruções: bilhões por segundo, em cada núcleo.",
+  refs:[["Latência por operação, de Colin Scott (com base em Jeff Dean)","https://colin-scott.github.io/personal_website/research/interactive_latency.html"]],
   kids:[
    ["Núcleos","Processadores de servidor vão de dezenas a mais de cem núcleos. Na nuvem, uma vCPU costuma ser uma thread de hardware de um núcleo."],
    ["Cache L1, L2 e L3","Memórias pequenas e muito rápidas dentro do processador. Ler da L1 leva cerca de 1 nanossegundo; da RAM, perto de 100."],
@@ -318,10 +320,11 @@ servidor:{
   ]},
  "Memória RAM":{
   what:"Onde ficam os dados que os programas usam agora. Rápida, mas volátil: faltou energia, perdeu tudo.",
+  refs:[["Latência por operação, de Colin Scott (com base em Jeff Dean)","https://colin-scott.github.io/personal_website/research/interactive_latency.html"]],
   kids:[
    ["Capacidade","Servidores de nuvem vão de poucos gigabytes a vários terabytes."],
    ["ECC","Memória que detecta e corrige erros de bit. É o padrão em servidores."],
-   ["Latência","Cerca de 100 nanossegundos por acesso: mil vezes mais rápido que um SSD."]
+   ["Latência","Cerca de 100 nanossegundos por acesso. Ler um bloco aleatório de um SSD leva dezenas de microssegundos: mais de cem vezes mais."]
   ]},
  "SSD e NVMe":{
   what:"Armazenamento persistente em chips de memória flash, sem partes móveis.",
@@ -332,6 +335,7 @@ servidor:{
   ]},
  "Placa de rede":{
   what:"Liga o servidor ao switch do rack, a 25, 100 ou mais gigabits por segundo.",
+  refs:[["Tipos de instância do Amazon EC2 e banda de rede","https://aws.amazon.com/ec2/instance-types/"]],
   kids:[
    ["Switch do rack","O primeiro salto: liga os servidores do rack entre si e à rede do data center."],
    ["Offload","Placas modernas fazem parte do trabalho de rede, e até de cifragem, sem gastar CPU."],
@@ -406,6 +410,7 @@ dispositivo:{
 roteador:{
  "Wi-Fi":{
   what:"A rede sem fio local, padronizada pelo IEEE como 802.11.",
+  refs:[["Wikipedia: gerações do Wi-Fi","https://en.wikipedia.org/wiki/Wi-Fi"],["Wi-Fi Alliance: Wi-Fi 7","https://www.wi-fi.org/discover-wi-fi/wi-fi-certified-7"]],
   kids:[
    ["Gerações","Wi-Fi 5 (802.11ac), Wi-Fi 6 e 6E (802.11ax) e Wi-Fi 7 (802.11be): cada uma mais rápida e melhor com muitos aparelhos."],
    ["Canais","As faixas são divididas em canais. Vizinhos no mesmo canal disputam o ar e ficam todos mais lentos."],
@@ -1167,6 +1172,7 @@ storage:{
   ]},
  "Objeto":{
   what:"Arquivos inteiros guardados sob uma chave e acessados por HTTP.",
+  refs:[["Durabilidade do Amazon S3","https://docs.aws.amazon.com/AmazonS3/latest/userguide/DataDurability.html"]],
   kids:[
    ["Buckets e chaves","backups/2026/10/08/banco.dump parece uma pasta, mas é só o nome do objeto."],
    ["Durabilidade","O S3 foi projetado para 99,999999999% de durabilidade, com os dados copiados entre zonas."],
@@ -1254,6 +1260,7 @@ fibra:{
   ]},
  "Backbone":{
   what:"As grandes rotas de fibra que ligam cidades e países, operadas por provedores e operadoras.",
+  refs:[["Wikipedia: fibra óptica","https://en.wikipedia.org/wiki/Optical_fiber"]],
   kids:[
    ["Anéis","As rotas formam anéis: cortou de um lado, o tráfego volta pelo outro."],
    ["Capacidade","Um único par de fibras com DWDM carrega dezenas de terabits por segundo."],
@@ -1263,6 +1270,7 @@ fibra:{
 cobre:{
  "Par trançado":{
   what:"Quatro pares de fios de cobre trançados, no conector RJ45: o cabo de rede do dia a dia.",
+  refs:[["Wikipedia: cabo Categoria 5","https://en.wikipedia.org/wiki/Category_5_cable"],["Wikipedia: cabo Categoria 6","https://en.wikipedia.org/wiki/Category_6_cable"]],
   kids:[
    ["Por que trançar","A trança cancela interferências: o ruído atinge os dois fios do par por igual."],
    ["Categorias","Cat5e para até 1 Gbps; Cat6a para 10 Gbps em até 100 metros."],
@@ -1277,6 +1285,7 @@ cobre:{
   ]},
  "Par telefônico":{
   what:"O fio do telefone fixo, adaptado para dados com o DSL.",
+  refs:[["Anatel: painel de acessos","https://informacoes.anatel.gov.br/paineis/acessos"],["Tecnoblog: fibra passa de 80%","https://tecnoblog.net/noticias/fibra-optica-ultrapassa-marca-de-80-pela-primeira-vez-no-brasil/"]],
   kids:[
    ["ADSL e VDSL","Usam frequências acima da voz no mesmo fio. Quanto mais longe da central, mais lento."],
    ["Em declínio","No Brasil, a fibra substituiu quase todo o DSL: os cabos metálicos somam pouco mais de 1% dos acessos fixos."],
@@ -1294,6 +1303,7 @@ radio:{
   ]},
  "Rede celular":{
   what:"A cidade é dividida em células, cada uma atendida por uma antena.",
+  refs:[["Anatel: 5G e o leilão de radiofrequências","https://www.gov.br/anatel/pt-br/assuntos/5G"]],
   kids:[
    ["Estação rádio base","A antena e os equipamentos de cada célula, ligados à operadora por fibra."],
    ["Handover","Ao se mover, o celular passa de uma célula para outra sem cair."],
@@ -1301,6 +1311,7 @@ radio:{
   ]},
  "Espectro":{
   what:"As frequências de rádio são um recurso finito, dividido por todos.",
+  refs:[["Anatel: 5G e o leilão de radiofrequências","https://www.gov.br/anatel/pt-br/assuntos/5G"]],
   kids:[
    ["Leilões","Operadoras pagam pelo direito de usar faixas. O leilão do 5G no Brasil foi em 2021."],
    ["Frequência e alcance","Frequências baixas vão longe e atravessam obstáculos; altas carregam mais dados, mas alcançam menos."],
@@ -1310,6 +1321,7 @@ radio:{
 satelite:{
  "Órbita geoestacionária":{
   what:"A 35.786 km de altura, o satélite gira junto com a Terra e parece parado no céu.",
+  refs:[["ESA: tipos de órbita","https://www.esa.int/ESA_Multimedia/Images/2024/12/Where_and_why_we_whizz_around_Earth"]],
   kids:[
    ["Cobertura","Três satélites bem posicionados cobrem quase todo o planeta."],
    ["Latência","A ida e volta passa de meio segundo. Videochamadas e jogos sofrem."],

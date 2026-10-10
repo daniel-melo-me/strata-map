@@ -229,8 +229,12 @@ svg.packets{z-index:4}
 .legend svg{vertical-align:middle;margin-right:10px}
 
 /* zoom dentro do zoom */
-.node .z-mark{position:absolute;right:8px;bottom:7px;color:var(--ink-2);opacity:.55;line-height:0}
-.node:hover .z-mark{opacity:1;color:var(--hue)}
+.node span{padding-right:14px}
+.node .z-mark{position:absolute;right:8px;bottom:8px;color:var(--hue);opacity:.75;line-height:0;transition:opacity .15s, transform .15s}
+.node:hover .z-mark,.node:focus-visible .z-mark,.node.is-sel .z-mark{opacity:1;transform:scale(1.15)}
+.hint-expand{font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.hint-expand svg{vertical-align:-2px;margin-right:4px;color:var(--ink)}
+.hint-expand b{color:var(--ink)}
 .panel h4.h-zoom{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .btn-zoom{display:inline-flex;align-items:center;gap:6px;border:1px solid color-mix(in srgb,var(--hue) 50%,var(--line));background:var(--card);color:var(--ink);border-radius:999px;padding:4px 11px;font-family:var(--body);font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;cursor:pointer}
 .btn-zoom svg{color:var(--hue)}

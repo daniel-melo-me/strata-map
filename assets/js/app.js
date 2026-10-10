@@ -10,8 +10,8 @@ const N=STYLE.nodes, E=STYLE.edges, JOURNEY=STYLE.journey;
 const Z=STRATA.zoom||{};
 const zoomOf=(id,name)=>Z[id]&&Z[id][name]||null;
 const hasZoom=id=>(N[id].inside||[]).some(([n])=>zoomOf(id,n));
-/* a lupa no mapa só ajuda se distingue algo: com todas as peças abríveis, ela some */
-const markZoom=id=>hasZoom(id)&&!Object.keys(N).every(hasZoom);
+/* expandir: toda peça abre um painel, então todas levam o ícone */
+const ICON_EXPAND=`<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const ICON_LENS=`<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M11 11l3.5 3.5M7 4.5v5M4.5 7h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`;
 
 /* ---------- render ---------- */
@@ -92,7 +92,7 @@ LAYERS.forEach((L,i)=>{
   Object.entries(N).filter(([,v])=>v.l===L.id).forEach(([id,v])=>{
     const b=document.createElement("button"); b.className="node"; b.dataset.id=id;
     Object.keys(v.ax||{}).forEach(k=>b.classList.add("ax-"+k));
-    b.innerHTML=`<i class="ax-dot"></i><i class="f-badge"></i><b>${v.n}</b><span>${v.t}</span>${markZoom(id)?`<i class="z-mark" title="Tem zoom por dentro">${ICON_LENS}</i>`:""}`;
+    b.innerHTML=`<i class="ax-dot"></i><i class="f-badge"></i><b>${v.n}</b><span>${v.t}</span><i class="z-mark" title="Abrir a peça">${ICON_EXPAND}</i>`;
     b.addEventListener("click",()=>fail.on?breakNode(id):state.sel===id?closePanel():select(id));
     nodes.appendChild(b); el[id]=b;
   });
@@ -175,6 +175,7 @@ function intro(){
    ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p>${others}</div>`:""}
    <h3>Abra qualquer peça</h3>
    <p>Cada caixa tem um mundo dentro. Ao abrir, você vê do que ela é feita, quem cuida dela, com quem conversa e o que acontece se ela cair.</p>
+   <p class="hint-expand"><span aria-hidden="true">${ICON_EXPAND}</span>Toque em qualquer caixa para abrir. Dentro do painel, ${ICON_LENS}<b>Entrar na peça</b> desce mais um nível.</p>
    <h4>Como ler as linhas</h4>
    <ul class="legend">${Object.entries(LEGEND).filter(([k])=>types.has(k)).map(([k,[dash,txt]])=>
     `<li><svg width="44" height="10" aria-hidden="true"><line x1="0" y1="5" x2="44" y2="5" stroke="var(--w-${k})" stroke-width="3"${dash?` stroke-dasharray="${dash}"`:""}/></svg>${txt}</li>`).join("")}</ul>

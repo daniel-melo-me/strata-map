@@ -9,6 +9,15 @@ const ROOT = path.join(__dirname, "..");
 const errors = new Set(), warnings = new Set();
 const err = m => errors.add(m), warn = m => warnings.add(m);
 const isStr = s => typeof s === "string" && s.trim().length > 0;
+/* fontes: [[rótulo, url https], ...] */
+const checkRefs = (refs, p) => {
+  if (refs === undefined) return;
+  if (!Array.isArray(refs) || !refs.length) return err(`${p}: "refs" deve ser uma lista não vazia`);
+  refs.forEach((r, i) => {
+    if (!Array.isArray(r) || r.length !== 2 || !isStr(r[0])) err(`${p}: fonte ${i} deve ser [rótulo, url]`);
+    else if (!/^https:\/\/[^\s"<>]+$/.test(r[1])) err(`${p}: fonte ${i} com url inválida (${r[1]})`);
+  });
+};
 
 /* ---------- index.html: arquivos locais e ordem dos scripts ---------- */
 const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
@@ -58,6 +67,7 @@ for (const [sid, st] of Object.entries(styles)) {
     (v.who || []).forEach(w => { if (!personas[w]) err(`${p}: persona "${w}" não existe`); });
     Object.keys(v.ax || {}).forEach(k => { if (!axes[k]) err(`${p}: eixo "${k}" não existe`); });
     if (v.tech && (!Array.isArray(v.tech) || !v.tech.every(isStr))) err(`${p}: "tech" inválido`);
+    checkRefs(v.refs, p);
   }
 
   const seen = new Set();
@@ -125,6 +135,7 @@ const isEx = ex => ex === undefined || (Array.isArray(ex) && ex.length === 2 && 
 function checkLevel(z, p, depth) {
   if (!isStr(z.what)) err(`${p}: sem "what"`);
   if (!isEx(z.ex)) err(`${p}: "ex" deve ser [rótulo, código]`);
+  checkRefs(z.refs, p);
   if (!Array.isArray(z.kids) || !z.kids.length) { err(`${p}: sem cartões`); return; }
   z.kids.forEach(([n, t, sub], i) => {
     if (!isStr(n) || !isStr(t)) err(`${p}: cartão ${i} incompleto`);

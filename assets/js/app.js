@@ -187,6 +187,9 @@ function setHash(id){
 function closePanel(){
   state.sel=null; refresh(); intro(); setHash(null);
 }
+/* fontes de um fato: refs = [[rótulo, url], ...], na peça ou num nível do zoom */
+const ICON_EXT=`<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const refLinks=refs=>(refs||[]).map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)}${ICON_EXT}<span class="sr-only"> (abre em nova aba)</span></a>`).join("");
 function select(id){
   clearFocus(); state.sel=id; refresh(); setHash(id);
   const v=N[id], L=LAYERS[layerIdx[v.l]];
@@ -206,7 +209,8 @@ function select(id){
    <h4>Se cair</h4><div class="fail">${v.fail}</div>
    ${STYLE.failure?`<button class="btn-break" data-break>${ICON_BOLT}Derrubar esta peça e ver a cascata</button>`:""}
    ${axn?`<h4>Eixos que passam por aqui</h4>${axn}`:""}
-   ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}`;
+   ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}
+   ${v.refs?`<h4>Fontes</h4><div class="refs">${refLinks(v.refs)}</div>`:""}`;
   panel.querySelector(".close").onclick=closePanel;
   const zb=panel.querySelector("[data-zoom]"); if(zb) zb.onclick=()=>openZoom([id]);
   panel.querySelectorAll("[data-zi]").forEach(b=>b.onclick=()=>openZoom([id,+b.dataset.zi]));
@@ -522,13 +526,13 @@ let zpath=[];
 /* o conteúdo de um nível: [peça], [peça, item], [peça, item, subitem] */
 function zLevel(path){
   const [id,i1,i2]=path, v=N[id];
-  if(path.length===1) return {title:v.n, what:v.what,
+  if(path.length===1) return {title:v.n, what:v.what, refs:v.refs,
     cards:v.inside.map(([n,t])=>{const z=zoomOf(id,n); return {n,t,kids:z?z.kids.length:0};})};
   const l2=zoomOf(id,v.inside[i1][0]);
-  if(path.length===2) return {title:v.inside[i1][0], what:l2.what, ex:l2.ex,
+  if(path.length===2) return {title:v.inside[i1][0], what:l2.what, ex:l2.ex, refs:l2.refs,
     cards:l2.kids.map(([n,t,sub])=>({n,t,kids:sub?sub.kids.length:0}))};
   const k=l2.kids[i2];
-  return {title:k[0], what:k[2].what, ex:k[2].ex, cards:k[2].kids.map(([n,t])=>({n,t,kids:0}))};
+  return {title:k[0], what:k[2].what, ex:k[2].ex, refs:k[2].refs, cards:k[2].kids.map(([n,t])=>({n,t,kids:0}))};
 }
 function validPath(p){
   try{ if(!N[p[0]]) return false; const L=zLevel(p); return !!(L&&L.what); }catch(_){ return false; }
@@ -544,6 +548,7 @@ function zStage(path, hl){
     <div class="zv-grid">${L.cards.map((c,i)=>c.kids
       ?`<button class="zv-card can${c.n===hl?" zv-hit":""}" data-i="${i}"><b>${c.n}</b><span>${c.t}</span><em>${ICON_LENS}${c.kids} partes por dentro</em></button>`
       :`<div class="zv-card${c.n===hl?" zv-hit":""}"><b>${c.n}</b><span>${c.t}</span></div>`).join("")}</div>
+    ${L.refs?`<div class="refs zv-refs"><span>Fontes</span>${refLinks(L.refs)}</div>`:""}
   </div>`;
   st.querySelectorAll(".zv-card.can").forEach(c=>c.onclick=()=>zoomTo([...path,+c.dataset.i],c));
   return st;

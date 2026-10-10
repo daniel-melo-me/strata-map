@@ -44,6 +44,7 @@ Ao tocar em qualquer componente, você vê:
 - **Quem cuida:** os papéis responsáveis por ele
 - **Se cair:** o que acontece com o resto do sistema
 - **Conversa com:** as peças ligadas a ele
+- **Fontes:** links para a documentação oficial ou a fonte primária de cada número, data e limite citado
 
 ---
 

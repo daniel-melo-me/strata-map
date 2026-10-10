@@ -37,7 +37,7 @@ Site estático, sem build. Abra `index.html` (veja a seção "Estrutura" do READ
 - `assets/js/data/microsservicos.js`: peças, conexões, jornada e falhas do estilo microsserviços.
 - `assets/js/data/monolito.js`: o mesmo para o monólito. Reaproveita as peças comuns de microsservicos.js com `pick(id, ajustes)`, então precisa carregar depois dele.
 - `assets/js/data/serverless.js`: o mesmo para o serverless, também com `pick` (carrega depois de microsservicos.js). As funções têm ids próprios (`fnpedidos`, `fnpagamentos`, `fnavisos`) porque o "por dentro" delas é outro; o gateway e o pipeline trocam um item do "por dentro" (`swap`) que não valia para funções.
-- `assets/js/data/zoom.js`: zoom dentro do zoom, em `STRATA.zoom[idDaPeça][nome do item do inside]` = `{what, ex?: [rótulo, código], kids: [[nome, texto, nível3?]]}`. Vale para todos os estilos, pela chave id + nome do item. Até 3 níveis.
+- `assets/js/data/zoom.js`: zoom dentro do zoom, em `STRATA.zoom[idDaPeça][nome do item do inside]` = `{what, ex?: [rótulo, código], refs?: [[rótulo, url]], kids: [[nome, texto, nível3?]]}`. Vale para todos os estilos, pela chave id + nome do item. Até 3 níveis.
 - `assets/js/failure.js`: cálculo da cascata do modo falha (função pura, testável no Node).
 - `assets/js/search.js`: busca rápida (função pura, testável no Node): pesos por campo, sem acentos, apelidos como k8s e db.
 - `assets/js/app.js`: render do mapa, painel, filtros, jornada, modo falha e caixa de busca.
@@ -68,6 +68,7 @@ Camadas, personas e eixos ficam em `base.js`. Cada estilo arquitetural registra 
 
 - Rode `node tests/validate.js` depois de mexer em dados. O GitHub Actions (`.github/workflows/validar.yml`) roda o mesmo a cada push. Erros quebram a verificação; peças sem conexão ou itens sem zoom só geram aviso.
 - Ids de peça: letra minúscula seguida de letras e números (vão nos links `#id`, `#falha-id`, `#zoom-id-…`).
+- Fontes: todo fato com número, data ou limite de fornecedor leva `refs: [[rótulo, url https]]` no nível onde aparece (peça ou nível do zoom). O painel mostra em "Fontes" e o zoom, embaixo dos cartões; abrem em nova aba. Prefira a documentação oficial ou a fonte primária (Anatel, CA/Browser Forum, root-servers.org); reportagem só quando não houver. O validador confere o formato; antes de publicar, confira se os links respondem.
 - Fatos com data foram checados na web em outubro de 2026: validade de certificados (200 dias desde mar/2026, 47 em 2029), faixa de 6 GHz (dividida pela Anatel no fim de 2024: 500 MHz Wi-Fi, 700 MHz móvel), failover do RDS (60 a 120 s), latência e tamanho da Starlink, ML-KEM nos navegadores, ~2 mil instâncias de servidores raiz, fibra em ~80% da banda larga fixa, IX.br, cabos de Fortaleza, PUE das nuvens. Serverless, checado em outubro de 2026: limites do Lambda (15 min, 1.000 de concorrência padrão, 1.000 ambientes novos a cada 10 s, /tmp até 10 GB, 1.769 MB = 1 vCPU), cobrança do INIT desde ago/2025, SnapStart em Java, Python e .NET, timeout do API Gateway (29 s REST, 30 s HTTP API), EventBridge (24 h e 185 tentativas), throttling assíncrono (6 h), Aurora Serverless v2 em 0 ACU, Cloud Run functions (antes Cloud Functions), Azure Linux Consumption aposentado em set/2028 (Flex Consumption), Lambda durable functions e Managed Instances (re:Invent 2025). Rechecar antes de grandes divulgações.
 
 ## Como trabalhar comigo

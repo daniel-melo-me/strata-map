@@ -60,6 +60,7 @@ dns:{
   ]},
  "Servidores raiz e de TLD":{
   what:"A hierarquia que permite achar qualquer domínio do mundo começando sempre do mesmo ponto.",
+  refs:[["Root Server System (root-servers.org)","https://root-servers.org/"]],
   ex:["Perguntando ao DNS pelo terminal","$ dig +short loja.com.br\n203.0.113.10"],
   kids:[
    ["Raiz","13 identidades de servidores raiz, operadas por 12 organizações e replicadas, por anycast, em cerca de 2 mil servidores pelo mundo."],
@@ -90,6 +91,7 @@ tls:{
    ["ServerHello e certificado","O servidor escolhe a cifra, envia a parte dele da troca de chaves e o certificado que prova quem é."],
    ["Troca de chaves (ECDHE)","Os dois calculam a mesma chave secreta sem que ela trafegue. Mesmo quem gravou tudo não consegue decifrar depois.",{
     what:"Diffie-Hellman com curvas elípticas: cada lado gera um par de chaves temporário só para esta conversa e, com a parte pública do outro, chega ao mesmo segredo.",
+    refs:[["Chromium: troca de chaves pós-quântica","https://blog.chromium.org/2024/05/advancing-our-amazing-bet-on-asymmetric.html"],["Cloudflare: suporte a criptografia pós-quântica","https://developers.cloudflare.com/ssl/post-quantum-cryptography/pqc-support/"]],
     kids:[
      ["Chaves efêmeras","São jogadas fora quando a conexão termina."],
      ["Sigilo futuro","Se a chave privada do servidor vazar amanhã, as conversas de hoje continuam protegidas."],
@@ -99,6 +101,7 @@ tls:{
   ]},
  "Certificado digital":{
   what:"Um documento que liga um domínio a uma chave pública, assinado por uma autoridade em quem o navegador confia.",
+  refs:[["CA/Browser Forum, ballot SC-081v3","https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/"]],
   kids:[
    ["Cadeia de confiança","O certificado do site é assinado por uma autoridade intermediária, assinada por uma raiz que já vem instalada no sistema."],
    ["Validade cada vez menor","O limite dos certificados públicos caiu de 398 para 200 dias em 2026 e chega a 47 dias em 2029. A renovação precisa ser automática."],
@@ -221,6 +224,7 @@ oltp:{
   ]},
  "Réplicas":{
   what:"Cópias do banco que recebem as mudanças do principal, para atender leituras e para assumir se ele cair.",
+  refs:[["Failover do RDS Multi-AZ","https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html"]],
   kids:[
    ["Replicação pelo log","O principal envia o próprio WAL às réplicas, que aplicam as mesmas mudanças."],
    ["Síncrona ou assíncrona","Síncrona espera a réplica confirmar e não perde nada, mas é mais lenta. Assíncrona é rápida, mas pode perder os últimos segundos numa queda."],
@@ -425,6 +429,7 @@ roteador:{
 provedor:{
  "Última milha":{
   what:"O trecho entre a rede do provedor e a sua casa. É onde estão as maiores diferenças de velocidade.",
+  refs:[["Anatel: painel de acessos","https://informacoes.anatel.gov.br/paineis/acessos"],["Tecnoblog: fibra passa de 80%","https://tecnoblog.net/noticias/fibra-optica-ultrapassa-marca-de-80-pela-primeira-vez-no-brasil/"]],
   kids:[
    ["FTTH","Fibra até a casa: cerca de 80% dos acessos de banda larga fixa no Brasil, segundo a Anatel."],
    ["GPON","Uma fibra do provedor é dividida por divisores ópticos passivos entre dezenas de casas."],
@@ -439,6 +444,7 @@ provedor:{
   ]},
  "Pontos de troca de tráfego":{
   what:"Lugares onde várias redes se conectam diretamente para trocar tráfego, sem intermediários.",
+  refs:[["IX.br","https://ix.br/"]],
   kids:[
    ["IX.br","O programa de pontos de troca do NIC.br, em 39 áreas metropolitanas. O de São Paulo, com picos acima de 35 Tbps, está entre os maiores do mundo."],
    ["Peering","Duas redes trocam tráfego entre si, em geral sem cobrança."],
@@ -1209,6 +1215,7 @@ datacenter:{
   ]},
  "Energia":{
   what:"Um data center não pode apagar. A energia chega por mais de um caminho.",
+  refs:[["Google: eficiência dos data centers","https://datacenters.google/efficiency"],["AWS: eficiência dos data centers","https://sustainability.aboutamazon.com/products-services/aws-cloud"]],
   kids:[
    ["Nobreak","Baterias seguram tudo nos segundos entre a queda da rede elétrica e a partida dos geradores."],
    ["Geradores","Motores a diesel com combustível para horas ou dias."],
@@ -1239,6 +1246,7 @@ fibra:{
   ]},
  "Cabos submarinos":{
   what:"Quase todo o tráfego entre continentes passa por cabos no fundo do mar, não por satélites.",
+  refs:[["Submarine Cable Map: Fortaleza","https://www.submarinecablemap.com/landing-point/fortaleza-brazil"],["O Povo: Fortaleza terá o 18º cabo (jan/2026)","https://mais.opovo.com.br/jornal/economia/2026/01/22/fortaleza-tera-18-cabo-submarino-de-fibra-optica-com-foco-em-ia.html"]],
   kids:[
    ["Volume","Entre 95% e 99% do tráfego entre continentes passa por eles. O tráfego dentro do país, em geral, nem chega ao mar."],
    ["Repetidores","A cada dezenas de quilômetros, amplificadores reforçam o sinal, alimentados por energia que corre no próprio cabo."],
@@ -1278,9 +1286,10 @@ cobre:{
 radio:{
  "Wi-Fi":{
   what:"Rádio de curto alcance, em faixas que dispensam licença.",
+  refs:[["Teletime: Anatel divide a faixa de 6 GHz (jan/2025)","https://teletime.com.br/13/01/2025/ppps-criticam-nova-decisao-da-anatel-que-divide-faixa-de-6-ghz/"],["Teletime: Wi-Fi restrito à parte de baixo dos 6 GHz (ago/2026)","https://teletime.com.br/13/08/2026/anatel-wi-fi-banda-inferior-6-ghz/"]],
   kids:[
    ["2,4 GHz","Vai mais longe e atravessa paredes, mas é lenta e congestionada."],
-   ["5 e 6 GHz","Mais rápidas e com mais canais, mas de alcance menor. Em 2021 a Anatel deu os 6 GHz inteiros ao Wi-Fi; no fim de 2024 dividiu a faixa: 500 MHz ficaram com o Wi-Fi e 700 MHz foram reservados à telefonia móvel."],
+   ["5 e 6 GHz","Mais rápidas e com mais canais, mas de alcance menor. Em 2021 a Anatel deu os 6 GHz inteiros ao Wi-Fi; no fim de 2024 dividiu a faixa: 500 MHz ficaram com o Wi-Fi e 700 MHz foram reservados à telefonia móvel. A partir de março de 2027, os equipamentos Wi-Fi certificados no Brasil precisam ficar na parte de baixo."],
    ["Malha (mesh)","Vários pontos de acesso cobrindo a casa toda como uma rede só."]
   ]},
  "Rede celular":{
@@ -1308,9 +1317,10 @@ satelite:{
   ]},
  "Órbita baixa":{
   what:"Constelações de milhares de satélites a algumas centenas de quilômetros de altura.",
+  refs:[["Jonathan McDowell: estatísticas da Starlink","https://planet4589.org/space/con/star/stats.html"]],
   kids:[
    ["Latência","Algo entre 25 e 60 milissegundos, perto da banda larga terrestre."],
-   ["Constelação","Cada satélite cruza o céu em minutos, por isso são necessários milhares: a Starlink tem perto de 10 mil em órbita."],
+   ["Constelação","Cada satélite cruza o céu em minutos, por isso são necessários milhares: a Starlink já passou de 10 mil em órbita."],
    ["Antena eletrônica","A antena muda a direção do feixe eletronicamente para seguir os satélites, sem partes móveis."]
   ]},
  "Estação terrestre":{
@@ -1328,6 +1338,7 @@ satelite:{
 Object.assign(Z.gateway,{
  "Rotas para funções":{
   what:"O gateway liga cada rota a uma função. Não há serviço esperando: a rota é o gatilho.",
+  refs:[["Timeout do API Gateway","https://repost.aws/knowledge-center/api-gateway-timeout-limit"],["Cotas das HTTP APIs","https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-quotas.html"]],
   ex:["Uma rota no AWS SAM","Events:\n  ListarPedidos:\n    Type: HttpApi\n    Properties:\n      Path: /pedidos\n      Method: GET"],
   kids:[
    ["Rota e método","GET /pedidos aciona a função de pedidos; POST /pedidos pode acionar a mesma ou outra função."],
@@ -1338,6 +1349,7 @@ Object.assign(Z.gateway,{
 Object.assign(Z.cicd,{
  "Pacote e versão":{
   what:"O build gera um pacote da função, publicado como uma versão numerada e imutável.",
+  refs:[["Cotas do AWS Lambda","https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"]],
   kids:[
    ["Zip ou imagem","Um arquivo .zip com o código e as bibliotecas, ou uma imagem de container de até 10 GB."],
    ["Versões e aliases","Cada publicação gera uma versão; um alias, como prod, aponta para a versão que está no ar."],
@@ -1357,6 +1369,7 @@ fnpedidos:{
   ]},
  "Código de inicialização":{
   what:"Tudo que está fora do handler roda uma vez, quando o ambiente nasce, e fica na memória para as próximas chamadas.",
+  refs:[["AWS: cobrança da fase INIT (ago/2025)","https://aws.amazon.com/blogs/compute/aws-lambda-standardizes-billing-for-init-phase/"]],
   ex:["Fora e dentro do handler","// roda uma vez por ambiente, no cold start\nconst db = new DynamoDBClient({});\n\n// roda a cada chamada\nexport const handler = async (event) => { /* usa db */ };"],
   kids:[
    ["Reaproveitar clientes","Criar o cliente do banco fora do handler evita refazer conexão e TLS a cada chamada."],
@@ -1365,6 +1378,7 @@ fnpedidos:{
   ]},
  "Sem estado":{
   what:"Duas chamadas seguidas podem cair em ambientes diferentes, e um ambiente pode sumir a qualquer momento.",
+  refs:[["Cotas do AWS Lambda","https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"]],
   kids:[
    ["Memória é só cache","Dá para guardar algo na memória entre chamadas do mesmo ambiente, mas nunca contar com isso."],
    ["Disco temporário","Cada ambiente tem uma pasta /tmp, de 512 MB a 10 GB no Lambda, apagada quando ele morre."],
@@ -1389,6 +1403,7 @@ fnpagamentos:{
   ]},
  "Chave de idempotência":{
   what:"Um identificador único da operação, como o id do pedido, que acompanha a cobrança do começo ao fim.",
+  refs:[["Powertools for AWS Lambda: idempotência","https://docs.powertools.aws.dev/lambda/python/latest/utilities/idempotency/"]],
   ex:["Registrar a chave só se ela for nova (PostgreSQL)","INSERT INTO cobrancas (pedido_id, status)\nVALUES ($1, 'em andamento')\nON CONFLICT (pedido_id) DO NOTHING;"],
   kids:[
    ["Primeiro registra, depois cobra","Se a chave já existe, a função devolve o resultado guardado em vez de cobrar de novo."],
@@ -1397,6 +1412,7 @@ fnpagamentos:{
   ]},
  "Tempo máximo":{
   what:"Toda função tem um limite de duração. Ao atingi-lo, a plataforma interrompe a execução no meio.",
+  refs:[["Cotas do AWS Lambda","https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"],["Timeout do API Gateway","https://repost.aws/knowledge-center/api-gateway-timeout-limit"]],
   kids:[
    ["Os tetos","15 minutos no Lambda. Atrás de um API Gateway, a resposta precisa vir em até 29 ou 30 segundos."],
    ["Trabalho longo","Divide-se em passos curtos, coordenados por um orquestrador, que pode esperar dias entre um e outro."],
@@ -1406,6 +1422,7 @@ fnpagamentos:{
 fnavisos:{
  "Gatilho da fila":{
   what:"A função não consulta a fila: a plataforma faz isso por ela e só a chama quando há mensagens.",
+  refs:[["Lambda com SQS: escala e concorrência máxima","https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-scaling.html"]],
   ex:["O gatilho, no AWS SAM","Events:\n  Avisos:\n    Type: SQS\n    Properties:\n      Queue: !GetAtt FilaDeAvisos.Arn\n      BatchSize: 10\n      FunctionResponseTypes:\n        - ReportBatchItemFailures"],
   kids:[
    ["Lotes","Várias mensagens numa chamada só, o que reduz o número de execuções."],
@@ -1414,6 +1431,7 @@ fnavisos:{
   ]},
  "Falha parcial do lote":{
   what:"Se uma mensagem de dez falha e a função lança erro, as dez voltam para a fila, inclusive as nove que já tinham dado certo.",
+  refs:[["Lambda com SQS: falhas parciais do lote","https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-errorhandling.html"]],
   ex:["Devolvendo só a que falhou","return {\n  batchItemFailures: [{ itemIdentifier: mensagem.messageId }]\n};"],
   kids:[
    ["Aviso em dobro","Sem isso, quem já recebeu o e-mail recebe de novo."],
@@ -1447,6 +1465,7 @@ barramento:{
   ]},
  "Retentativa de entrega":{
   what:"Se o destino não aceita o evento, o barramento tenta de novo, com intervalos crescentes e um pouco de aleatoriedade.",
+  refs:[["Retentativa do EventBridge","https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rule-retry-policy.html"]],
   kids:[
    ["Os padrões","No EventBridge, até 24 horas e 185 tentativas, o que vier primeiro. Os dois valores podem ser reduzidos."],
    ["Quando desiste","O evento é descartado, a não ser que haja uma fila de mensagens mortas configurada para recebê-lo."],
@@ -1456,6 +1475,7 @@ barramento:{
 filas:{
  "Tempo de invisibilidade":{
   what:"Quando alguém pega uma mensagem, ela não é apagada: fica invisível por um prazo. Se não for confirmada, reaparece.",
+  refs:[["Lambda com SQS: tempo de invisibilidade","https://docs.aws.amazon.com/lambda/latest/dg/services-sqs-configure.html"]],
   kids:[
    ["Confirmar é apagar","Depois de processar, o consumidor apaga a mensagem. Com o gatilho de funções, a plataforma faz isso sozinha."],
    ["Prazo maior que a função","O prazo precisa ser maior que o tempo máximo da função; a AWS recomenda pelo menos seis vezes."],
@@ -1463,6 +1483,7 @@ filas:{
   ]},
  "Fila de mensagens mortas":{
   what:"Uma segunda fila que recebe as mensagens que falharam vezes demais.",
+  refs:[["Filas de mensagens mortas no SQS","https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html"]],
   kids:[
    ["Número de tentativas","Configurado na fila: depois de, por exemplo, cinco recebimentos sem sucesso, a mensagem é movida."],
    ["Investigar e reenviar","Corrigido o problema, as mensagens podem voltar para a fila original."],
@@ -1470,6 +1491,7 @@ filas:{
   ]},
  "Padrão ou FIFO":{
   what:"Dois tipos de fila, com garantias diferentes.",
+  refs:[["SQS FIFO: deduplicação","https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html"]],
   kids:[
    ["Padrão","Vazão quase ilimitada, entrega pelo menos uma vez e ordem aproximada."],
    ["FIFO","Ordem garantida dentro de cada grupo de mensagens e sem duplicatas num intervalo de cinco minutos, com vazão menor."],
@@ -1494,6 +1516,7 @@ orquestrador:{
   ]},
  "Espera longa":{
   what:"O fluxo pode parar e esperar sem nenhuma função rodando, e sem pagar pela espera delas.",
+  refs:[["Cotas do Step Functions","https://docs.aws.amazon.com/step-functions/latest/dg/service-quotas.html"],["Lambda durable functions","https://docs.aws.amazon.com/lambda/latest/dg/durable-functions.html"]],
   kids:[
    ["Esperar um tempo","Por exemplo, cancelar o pedido se o Pix não for pago em 30 minutos."],
    ["Esperar um sinal","Pausar até alguém aprovar ou um sistema externo avisar, com um token de retorno."],
@@ -1510,6 +1533,7 @@ proxy:{
   ]},
  "Pool compartilhado":{
   what:"O proxy mantém poucas conexões reais com o banco e as empresta às funções, uma transação por vez.",
+  refs:[["RDS Proxy: fixação de conexões","https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy-pinning.html"]],
   kids:[
    ["Multiplexação","Entre uma transação e outra, a mesma conexão real atende outra função."],
    ["Fila de espera","Num pico, as funções esperam por uma conexão livre em vez de derrubar o banco."],
@@ -1517,6 +1541,7 @@ proxy:{
   ]},
  "Failover mais curto":{
   what:"Quando o banco principal cai, a réplica assume. O proxy esconde essa troca das funções.",
+  refs:[["Amazon RDS Proxy","https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"]],
   kids:[
    ["Sem esperar o DNS","O proxy sabe para onde ir na hora; as funções continuam usando o mesmo endereço."],
    ["Conexões preservadas","As funções esperam a troca terminar, em vez de receberem erro de conexão."],
@@ -1526,11 +1551,13 @@ proxy:{
 runtime:{
  "Cold start":{
   what:"A primeira chamada de um ambiente novo paga a preparação dele. As seguintes reaproveitam o que já está pronto.",
+  refs:[["Cold start por linguagem, medições de Mikhail Shilkov","https://mikhail.io/serverless/coldstarts/aws/languages/"],["Lambda SnapStart","https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html"]],
   kids:[
    ["As etapas","Criar a microVM, carregar o código, iniciar o runtime da linguagem e rodar o código de inicialização."],
    ["Quanto custa","Em Node.js ou Python, algumas centenas de milissegundos; em Java, .NET e imagens grandes, perto de um segundo ou mais."],
    ["Como encurtar","Pacote menor, foto do ambiente pronto ou ambientes sempre aquecidos.",{
     what:"Três caminhos, com custos diferentes.",
+    refs:[["Lambda SnapStart","https://docs.aws.amazon.com/lambda/latest/dg/snapstart.html"]],
     kids:[
      ["Pacote menor","Menos bibliotecas e uma inicialização mais simples."],
      ["SnapStart","Guarda uma foto do ambiente já iniciado e restaura a partir dela. Funciona em Java, Python e .NET."],
@@ -1539,6 +1566,7 @@ runtime:{
   ]},
  "Concorrência":{
   what:"Concorrência é quantas execuções acontecem ao mesmo tempo. Ela cresce e diminui sozinha com a demanda.",
+  refs:[["Escala do Lambda","https://docs.aws.amazon.com/lambda/latest/dg/scaling-behavior.html"],["Concorrência no Cloud Run","https://cloud.google.com/run/docs/about-concurrency"],["Lambda Managed Instances","https://docs.aws.amazon.com/lambda/latest/dg/lambda-managed-instances.html"]],
   kids:[
    ["A conta","Chamadas por segundo vezes a duração média: cem por segundo, de 200 ms cada, dão 20 execuções simultâneas."],
    ["Ritmo de escala","No Lambda, cada função pode ganhar até mil ambientes novos a cada 10 segundos."],
@@ -1547,6 +1575,7 @@ runtime:{
   ]},
  "Throttling":{
   what:"Quando a concorrência chega ao limite, a plataforma recusa novas execuções até sobrar espaço.",
+  refs:[["Erros e retentativas em chamadas assíncronas","https://docs.aws.amazon.com/lambda/latest/dg/invocation-async-error-handling.html"]],
   kids:[
    ["Síncrona","Quem chamou recebe um erro 429 e decide se tenta de novo."],
    ["Assíncrona","O evento volta para a fila interna e é tentado de novo por até seis horas."],
@@ -1554,6 +1583,7 @@ runtime:{
   ]},
  "Cobrança por uso":{
   what:"Sem chamadas, a conta das funções é zero. Com muitas, pode passar do custo de servidores ligados o tempo todo.",
+  refs:[["Preços do AWS Lambda","https://aws.amazon.com/lambda/pricing/"],["Cotas do AWS Lambda","https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"]],
   kids:[
    ["As duas partes","Um valor por milhão de chamadas e outro por GB-segundo: memória configurada vezes tempo de execução."],
    ["Memória é CPU","No Lambda, a CPU cresce junto com a memória: com 1.769 MB, a função tem o equivalente a uma vCPU."],
@@ -1563,6 +1593,7 @@ runtime:{
 microvm:{
  "Firecracker":{
   what:"Um monitor de máquinas virtuais minimalista, escrito em Rust, que a AWS publicou como código aberto em 2018.",
+  refs:[["Firecracker","https://firecracker-microvm.github.io/"]],
   kids:[
    ["Só o essencial","Emula poucos dispositivos, como rede e disco, e por isso sobe rápido e ocupa pouca memória."],
    ["Em frações de segundo","O projeto promete iniciar uma microVM em 125 ms ou menos, até o sistema dela começar a rodar."],
@@ -1570,6 +1601,7 @@ microvm:{
   ]},
  "Isolamento":{
   what:"Num servidor da nuvem rodam funções de muitos clientes. Separar umas das outras é a primeira regra.",
+  refs:[["gVisor","https://gvisor.dev/"],["Como o Cloudflare Workers funciona","https://developers.cloudflare.com/workers/reference/how-workers-works/"]],
   kids:[
    ["Kernel próprio","Cada microVM tem o seu kernel: quem escapa do processo continua preso na máquina virtual."],
    ["Containers sozinhos não bastam","Containers dividem o kernel do servidor. Para código de estranhos, as nuvens põem uma camada a mais."],

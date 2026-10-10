@@ -49,24 +49,25 @@ Ao tocar em qualquer componente, você vê:
 
 ## ✨ Recursos
 
-### 🏛️ Dois estilos arquiteturais
+### 🏛️ Três estilos arquiteturais
 
 Escolha o estilo no topo da página e veja o mesmo sistema montado de outro jeito:
 
 - **Microsserviços:** cada parte do negócio é um serviço independente, com deploy e banco próprios, conversando pela rede.
 - **Monólito:** um único programa com todos os módulos dentro. Os módulos se chamam em memória, sem rede, e dividem um banco só.
+- **Serverless:** o código vira funções que só rodam quando chamadas. O provedor cuida de servidores e escala; a jornada mostra o preço disso, o cold start.
 
-As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e o que cai junto no modo falha. O estilo fica no link: `?estilo=monolito`.
+As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e o que cai junto no modo falha. O estilo fica no link: `?estilo=monolito` ou `?estilo=serverless`.
 
 ### ▶️ A jornada de um clique
 
-Acompanhe uma requisição real atravessando todas as camadas, em 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo, chegando a cerca de **200 milissegundos**.
+Acompanhe uma requisição real atravessando todas as camadas, em até 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo, chegando a cerca de **200 milissegundos** em microsserviços. No serverless, a mesma consulta com cold start passa de **400**.
 
 ### ⚡ Modo falha
 
 Derrube qualquer peça e veja a cascata: quem para junto, quem só degrada, quem congela (o que roda continua, só as mudanças param) e quem segura o tranco, como a fila que guarda os eventos até o consumidor voltar. No fim, o veredito: o usuário percebe ou não?
 
-Cada queda também mostra o que aconteceria no outro estilo: no monólito, um módulo com vazamento de memória derruba o processo inteiro; em microsserviços, a mesma falha só degrada.
+Cada queda também mostra o que aconteceria nos outros estilos: no monólito, um módulo com vazamento de memória derruba o processo inteiro; em microsserviços, a mesma falha só degrada. No serverless, a fila e o orquestrador seguram o trabalho enquanto uma função está fora.
 
 A chave **Com redundância** mostra a produção real, com réplicas, failover e várias zonas. Desligada, mostra a cascata inteira e por que a redundância existe. Cada cenário tem link direto: `#falha-oltp` abre o mapa com o banco relacional derrubado.
 
@@ -149,6 +150,7 @@ assets/css/styles.css          estilos, temas claro e escuro
 assets/js/data/base.js         camadas, personas e eixos (comuns a todos os estilos)
 assets/js/data/microsservicos.js  peças, conexões, jornada e falhas do estilo microsserviços
 assets/js/data/monolito.js     o mesmo para o monólito, reaproveitando as peças comuns
+assets/js/data/serverless.js   o mesmo para o serverless, também reaproveitando as peças comuns
 assets/js/data/zoom.js         o que existe por dentro de cada parte das peças (zoom dentro do zoom)
 assets/js/failure.js           cálculo da cascata do modo falha
 assets/js/search.js            busca rápida por nome, tecnologia e conteúdo das peças
@@ -166,7 +168,8 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 ## 🛣️ Próximos passos
 
 - [x] Segundo estilo arquitetural: monólito
-- [ ] Novos estilos arquiteturais: event-driven, hexagonal e serverless
+- [x] Terceiro estilo arquitetural: serverless
+- [ ] Novos estilos arquiteturais: event-driven e hexagonal
 - [x] Busca rápida (⌘K)
 - [x] Zoom dentro do zoom: tornar navegável o "por dentro" de cada peça
 - [ ] Validação de conformidade: checar se uma aplicação está apta a uma arquitetura

@@ -20,7 +20,7 @@ const refs = [
 ].filter(r => !/^(https?:)?\/\//.test(r));
 for (const r of refs) if (!fs.existsSync(path.join(ROOT, r))) err(`index.html cita ${r}, que não existe`);
 
-const ORDER = ["data/base.js", "data/microsservicos.js", "data/monolito.js", "data/zoom.js", "failure.js", "search.js", "app.js"];
+const ORDER = ["data/base.js", "data/microsservicos.js", "data/monolito.js", "data/serverless.js", "data/zoom.js", "failure.js", "search.js", "app.js"];
 const pos = ORDER.map(f => scripts.findIndex(s => s.endsWith(f)));
 pos.forEach((p, i) => { if (p < 0) err(`index.html não carrega ${ORDER[i]}`); });
 for (let i = 1; i < pos.length; i++)
@@ -28,7 +28,7 @@ for (let i = 1; i < pos.length; i++)
 
 /* ---------- carrega os dados como o navegador carrega ---------- */
 global.window = global;
-for (const f of ORDER.slice(0, 6)) require(path.join(ROOT, "assets/js", f));
+for (const f of ORDER.slice(0, 7)) require(path.join(ROOT, "assets/js", f));
 const { layers, personas, axes, styles, zoom, simulateFailure, searchNodes, searchZoom } = global.STRATA;
 
 const layerIds = new Set(layers.map(l => l.id));

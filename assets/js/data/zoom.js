@@ -1322,4 +1322,266 @@ satelite:{
   ]}
 }
 });
+
+/* Serverless: peças próprias do estilo e os itens que só ele usa no gateway e no pipeline.
+ * Fatos com data checados na web em outubro de 2026 (veja o cabeçalho de serverless.js). */
+Object.assign(Z.gateway,{
+ "Rotas para funções":{
+  what:"O gateway liga cada rota a uma função. Não há serviço esperando: a rota é o gatilho.",
+  ex:["Uma rota no AWS SAM","Events:\n  ListarPedidos:\n    Type: HttpApi\n    Properties:\n      Path: /pedidos\n      Method: GET"],
+  kids:[
+   ["Rota e método","GET /pedidos aciona a função de pedidos; POST /pedidos pode acionar a mesma ou outra função."],
+   ["Evento padronizado","O gateway transforma a requisição HTTP num evento JSON que a função entende."],
+   ["Limite de espera","Se a função passa de 29 segundos (30 nas HTTP APIs), o gateway desiste e responde 504."]
+  ]}
+});
+Object.assign(Z.cicd,{
+ "Pacote e versão":{
+  what:"O build gera um pacote da função, publicado como uma versão numerada e imutável.",
+  kids:[
+   ["Zip ou imagem","Um arquivo .zip com o código e as bibliotecas, ou uma imagem de container de até 10 GB."],
+   ["Versões e aliases","Cada publicação gera uma versão; um alias, como prod, aponta para a versão que está no ar."],
+   ["Canary pelo alias","O alias pode mandar uma fatia das chamadas, como 10%, para a versão nova antes de virar tudo."]
+  ]}
+});
+
+Object.assign(Z,{
+fnpedidos:{
+ "Handler":{
+  what:"O ponto de entrada da função. A plataforma chama o handler com um evento que descreve a requisição e espera um retorno.",
+  ex:["A função de pedidos, em Node.js","export const handler = async (event) => {\n  const cliente = event.requestContext.authorizer.jwt.claims.sub;\n  const pedidos = await listarPedidos(cliente);\n  return { statusCode: 200, body: JSON.stringify(pedidos) };\n};"],
+  kids:[
+   ["Evento","Um objeto JSON com método, caminho, cabeçalhos, corpo e quem está chamando, já validado pelo gateway."],
+   ["Contexto","Dados da execução, como quanto tempo ainda resta antes do limite."],
+   ["Retorno","Para o gateway, um status HTTP, cabeçalhos e corpo. Uma exceção não tratada vira erro para quem chamou."]
+  ]},
+ "Código de inicialização":{
+  what:"Tudo que está fora do handler roda uma vez, quando o ambiente nasce, e fica na memória para as próximas chamadas.",
+  ex:["Fora e dentro do handler","// roda uma vez por ambiente, no cold start\nconst db = new DynamoDBClient({});\n\n// roda a cada chamada\nexport const handler = async (event) => { /* usa db */ };"],
+  kids:[
+   ["Reaproveitar clientes","Criar o cliente do banco fora do handler evita refazer conexão e TLS a cada chamada."],
+   ["Pacote enxuto","Quanto menos bibliotecas para carregar, mais curto o cold start."],
+   ["Também é cobrado","Desde agosto de 2025, o Lambda cobra o tempo dessa inicialização, que antes era grátis na maioria das funções."]
+  ]},
+ "Sem estado":{
+  what:"Duas chamadas seguidas podem cair em ambientes diferentes, e um ambiente pode sumir a qualquer momento.",
+  kids:[
+   ["Memória é só cache","Dá para guardar algo na memória entre chamadas do mesmo ambiente, mas nunca contar com isso."],
+   ["Disco temporário","Cada ambiente tem uma pasta /tmp, de 512 MB a 10 GB no Lambda, apagada quando ele morre."],
+   ["Estado de verdade","Sessões, carrinhos e arquivos vão para banco, cache ou armazenamento de objetos."]
+  ]},
+ "Papel de acesso":{
+  what:"A função não guarda senha nem chave: ela assume um papel, e o provedor entrega credenciais temporárias a cada ambiente.",
+  ex:["Uma permissão mínima, em IAM","{\n  \"Effect\": \"Allow\",\n  \"Action\": [\"dynamodb:Query\"],\n  \"Resource\": \"arn:aws:dynamodb:sa-east-1:123456789012:table/pedidos\"\n}"],
+  kids:[
+   ["Menor privilégio","A função de pedidos só consulta a tabela de pedidos. Se for invadida, o estrago fica nesse limite."],
+   ["Credenciais temporárias","Expiram sozinhas e são renovadas pelo provedor; nada fica escrito no código."],
+   ["Quem pode chamar","Outra política diz quem pode acionar a função: o gateway, a fila, o orquestrador."]
+  ]}
+},
+fnpagamentos:{
+ "Entrega pelo menos uma vez":{
+  what:"Garantir que uma mensagem chegue exatamente uma vez numa rede que falha é caro. Os serviços gerenciados preferem garantir que ela chegue, mesmo que repetida.",
+  kids:[
+   ["Por que repete","A função cobrou, mas caiu antes de confirmar. Para o sistema, a mensagem não foi processada e volta."],
+   ["Onde acontece","Filas padrão, barramentos, gatilhos assíncronos e retentativas do orquestrador podem repetir."],
+   ["A resposta","Em vez de impedir a repetição, tornar o efeito repetível sem dano: idempotência."]
+  ]},
+ "Chave de idempotência":{
+  what:"Um identificador único da operação, como o id do pedido, que acompanha a cobrança do começo ao fim.",
+  ex:["Registrar a chave só se ela for nova (PostgreSQL)","INSERT INTO cobrancas (pedido_id, status)\nVALUES ($1, 'em andamento')\nON CONFLICT (pedido_id) DO NOTHING;"],
+  kids:[
+   ["Primeiro registra, depois cobra","Se a chave já existe, a função devolve o resultado guardado em vez de cobrar de novo."],
+   ["No adquirente também","Muitos adquirentes aceitam uma chave de idempotência na própria chamada e não cobram duas vezes com ela."],
+   ["Ferramentas prontas","Bibliotecas como o Powertools for AWS Lambda trazem idempotência pronta para usar."]
+  ]},
+ "Tempo máximo":{
+  what:"Toda função tem um limite de duração. Ao atingi-lo, a plataforma interrompe a execução no meio.",
+  kids:[
+   ["Os tetos","15 minutos no Lambda. Atrás de um API Gateway, a resposta precisa vir em até 29 ou 30 segundos."],
+   ["Trabalho longo","Divide-se em passos curtos, coordenados por um orquestrador, que pode esperar dias entre um e outro."],
+   ["Menor que o de quem chama","Se a função demora mais do que o chamador espera, ele desiste e tenta de novo enquanto ela ainda roda: cobrança em dobro à vista."]
+  ]}
+},
+fnavisos:{
+ "Gatilho da fila":{
+  what:"A função não consulta a fila: a plataforma faz isso por ela e só a chama quando há mensagens.",
+  ex:["O gatilho, no AWS SAM","Events:\n  Avisos:\n    Type: SQS\n    Properties:\n      Queue: !GetAtt FilaDeAvisos.Arn\n      BatchSize: 10\n      FunctionResponseTypes:\n        - ReportBatchItemFailures"],
+  kids:[
+   ["Lotes","Várias mensagens numa chamada só, o que reduz o número de execuções."],
+   ["Escala pela fila","Com a fila cheia, a plataforma aumenta aos poucos as execuções em paralelo."],
+   ["Concorrência máxima","Um teto de execuções simultâneas evita que a função sufoque o provedor de e-mail."]
+  ]},
+ "Falha parcial do lote":{
+  what:"Se uma mensagem de dez falha e a função lança erro, as dez voltam para a fila, inclusive as nove que já tinham dado certo.",
+  ex:["Devolvendo só a que falhou","return {\n  batchItemFailures: [{ itemIdentifier: mensagem.messageId }]\n};"],
+  kids:[
+   ["Aviso em dobro","Sem isso, quem já recebeu o e-mail recebe de novo."],
+   ["Só as que falharam voltam","A função lista as mensagens com problema; as outras são apagadas da fila."],
+   ["Mensagem envenenada","Uma mensagem que sempre falha acaba na fila de mensagens mortas, em vez de travar as outras."]
+  ]},
+ "Mensagem e envio":{
+  what:"A parte que de fato fala com o usuário: monta o texto e entrega pelo canal certo.",
+  kids:[
+   ["Templates","O texto de cada aviso, com espaços para o nome, o número do pedido e o valor."],
+   ["Provedores","Amazon SES ou outro serviço de e-mail, Twilio para SMS, Firebase Cloud Messaging para push."],
+   ["Ritmo do provedor","Cada provedor aceita um número de envios por segundo; a concorrência máxima da função respeita esse ritmo."]
+  ]}
+},
+barramento:{
+ "Regras":{
+  what:"Cada regra é um padrão sobre o conteúdo do evento. Quando um evento casa com ele, é entregue aos destinos da regra.",
+  ex:["Uma regra no EventBridge","{\n  \"source\": [\"loja.pedidos\"],\n  \"detail-type\": [\"PedidoCriado\"],\n  \"detail\": { \"valor\": [{ \"numeric\": [\">\", 0] }] }\n}"],
+  kids:[
+   ["Quem publica não sabe quem ouve","A função de pedidos só publica o fato; quem reage é decidido nas regras."],
+   ["Vários destinos","O mesmo evento pode iniciar o fluxo de pagamento e alimentar a fila de avisos."],
+   ["Filtro no barramento","Cada destino recebe só o que interessa, sem código para descartar o resto."]
+  ]},
+ "Esquema do evento":{
+  what:"O contrato entre quem publica e quem consome: os campos e o significado de cada um.",
+  ex:["O evento “pedido criado”","{\n  \"source\": \"loja.pedidos\",\n  \"detail-type\": \"PedidoCriado\",\n  \"detail\": { \"pedido\": \"p-981\", \"cliente\": 42, \"valor\": 129.9 }\n}"],
+  kids:[
+   ["Fato no passado","O nome diz o que já aconteceu, como PedidoCriado, e não dá uma ordem."],
+   ["Registro de esquemas","Guarda as versões de cada evento e pode gerar código a partir delas."],
+   ["Mudar sem quebrar","Campos novos podem ser adicionados; remover ou renomear quebra quem consome."]
+  ]},
+ "Retentativa de entrega":{
+  what:"Se o destino não aceita o evento, o barramento tenta de novo, com intervalos crescentes e um pouco de aleatoriedade.",
+  kids:[
+   ["Os padrões","No EventBridge, até 24 horas e 185 tentativas, o que vier primeiro. Os dois valores podem ser reduzidos."],
+   ["Quando desiste","O evento é descartado, a não ser que haja uma fila de mensagens mortas configurada para recebê-lo."],
+   ["Só erros temporários","Destino sobrecarregado ou fora do ar ganha nova tentativa; erro de permissão ou de configuração, não."]
+  ]}
+},
+filas:{
+ "Tempo de invisibilidade":{
+  what:"Quando alguém pega uma mensagem, ela não é apagada: fica invisível por um prazo. Se não for confirmada, reaparece.",
+  kids:[
+   ["Confirmar é apagar","Depois de processar, o consumidor apaga a mensagem. Com o gatilho de funções, a plataforma faz isso sozinha."],
+   ["Prazo maior que a função","O prazo precisa ser maior que o tempo máximo da função; a AWS recomenda pelo menos seis vezes."],
+   ["Por que repete","Se a função passa do prazo, a mensagem reaparece e outro ambiente a processa de novo."]
+  ]},
+ "Fila de mensagens mortas":{
+  what:"Uma segunda fila que recebe as mensagens que falharam vezes demais.",
+  kids:[
+   ["Número de tentativas","Configurado na fila: depois de, por exemplo, cinco recebimentos sem sucesso, a mensagem é movida."],
+   ["Investigar e reenviar","Corrigido o problema, as mensagens podem voltar para a fila original."],
+   ["Alarme","Mensagem morta quase sempre é bug: vale um alerta assim que essa fila deixa de estar vazia."]
+  ]},
+ "Padrão ou FIFO":{
+  what:"Dois tipos de fila, com garantias diferentes.",
+  kids:[
+   ["Padrão","Vazão quase ilimitada, entrega pelo menos uma vez e ordem aproximada."],
+   ["FIFO","Ordem garantida dentro de cada grupo de mensagens e sem duplicatas num intervalo de cinco minutos, com vazão menor."],
+   ["Qual escolher","Avisos de e-mail toleram ordem trocada; movimentações de uma mesma conta, não."]
+  ]}
+},
+orquestrador:{
+ "Máquina de estados":{
+  what:"O fluxo vira um desenho de passos, com o que entra e sai de cada um. O orquestrador executa e registra cada transição.",
+  ex:["Dois passos, em Amazon States Language","{\n  \"StartAt\": \"Cobrar\",\n  \"States\": {\n    \"Cobrar\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:states:::lambda:invoke\",\n      \"Parameters\": { \"FunctionName\": \"cobrar\" },\n      \"Next\": \"Confirmar\"\n    },\n    \"Confirmar\": {\n      \"Type\": \"Task\",\n      \"Resource\": \"arn:aws:states:::lambda:invoke\",\n      \"Parameters\": { \"FunctionName\": \"confirmar\" },\n      \"End\": true\n    }\n  }\n}"],
+  kids:[
+   ["Passos","Chamar uma função, esperar, escolher um caminho, rodar coisas em paralelo."],
+   ["Histórico","Cada execução fica registrada passo a passo, com entradas, saídas e erros."],
+   ["Desenho ou código","No Step Functions, o fluxo é um JSON; nas durable functions e no Temporal, é código comum com pontos de checkpoint."]
+  ]},
+ "Retentativa e compensação":{
+  what:"Num fluxo distribuído não há uma transação que desfaz tudo. Cada passo precisa saber tentar de novo e, se preciso, voltar atrás.",
+  kids:[
+   ["Retentativa por passo","Quantas vezes, com que intervalo e para quais erros."],
+   ["Saga","Uma sequência de passos em que cada um tem o seu desfazer: cobrou e não conseguiu confirmar o pedido? Estorna."],
+   ["Erro de negócio","Cartão recusado não é falha técnica: não se tenta de novo, segue-se outro caminho."]
+  ]},
+ "Espera longa":{
+  what:"O fluxo pode parar e esperar sem nenhuma função rodando, e sem pagar pela espera delas.",
+  kids:[
+   ["Esperar um tempo","Por exemplo, cancelar o pedido se o Pix não for pago em 30 minutos."],
+   ["Esperar um sinal","Pausar até alguém aprovar ou um sistema externo avisar, com um token de retorno."],
+   ["Até um ano","Os fluxos padrão do Step Functions e as durable functions do Lambda podem durar até um ano."]
+  ]}
+},
+proxy:{
+ "O problema das conexões":{
+  what:"Uma conexão com o banco relacional custa memória no servidor. Com funções, o número delas cresce junto com a concorrência.",
+  kids:[
+   ["Uma por ambiente","Mil execuções simultâneas podem significar mil conexões abertas ao mesmo tempo."],
+   ["O limite do banco","O banco aceita um número máximo de conexões, que depende do tamanho da instância. Acima dele, recusa."],
+   ["Conexões esquecidas","Um ambiente congelado ou descartado pode deixar a conexão aberta até ela expirar."]
+  ]},
+ "Pool compartilhado":{
+  what:"O proxy mantém poucas conexões reais com o banco e as empresta às funções, uma transação por vez.",
+  kids:[
+   ["Multiplexação","Entre uma transação e outra, a mesma conexão real atende outra função."],
+   ["Fila de espera","Num pico, as funções esperam por uma conexão livre em vez de derrubar o banco."],
+   ["Fixação","Alguns recursos, como variáveis de sessão, prendem a conexão a uma função só e reduzem o ganho."]
+  ]},
+ "Failover mais curto":{
+  what:"Quando o banco principal cai, a réplica assume. O proxy esconde essa troca das funções.",
+  kids:[
+   ["Sem esperar o DNS","O proxy sabe para onde ir na hora; as funções continuam usando o mesmo endereço."],
+   ["Conexões preservadas","As funções esperam a troca terminar, em vez de receberem erro de conexão."],
+   ["Segredos","O proxy busca as credenciais num cofre de segredos e pode exigir autenticação pelo papel de acesso."]
+  ]}
+},
+runtime:{
+ "Cold start":{
+  what:"A primeira chamada de um ambiente novo paga a preparação dele. As seguintes reaproveitam o que já está pronto.",
+  kids:[
+   ["As etapas","Criar a microVM, carregar o código, iniciar o runtime da linguagem e rodar o código de inicialização."],
+   ["Quanto custa","Em Node.js ou Python, algumas centenas de milissegundos; em Java, .NET e imagens grandes, perto de um segundo ou mais."],
+   ["Como encurtar","Pacote menor, foto do ambiente pronto ou ambientes sempre aquecidos.",{
+    what:"Três caminhos, com custos diferentes.",
+    kids:[
+     ["Pacote menor","Menos bibliotecas e uma inicialização mais simples."],
+     ["SnapStart","Guarda uma foto do ambiente já iniciado e restaura a partir dela. Funciona em Java, Python e .NET."],
+     ["Concorrência provisionada","Deixa um número de ambientes sempre aquecidos, pagando por eles mesmo sem uso."]
+    ]}]
+  ]},
+ "Concorrência":{
+  what:"Concorrência é quantas execuções acontecem ao mesmo tempo. Ela cresce e diminui sozinha com a demanda.",
+  kids:[
+   ["A conta","Chamadas por segundo vezes a duração média: cem por segundo, de 200 ms cada, dão 20 execuções simultâneas."],
+   ["Ritmo de escala","No Lambda, cada função pode ganhar até mil ambientes novos a cada 10 segundos."],
+   ["Reservada","Separar uma parte do limite da conta para uma função garante capacidade a ela e impede que tome a das outras."],
+   ["Várias por ambiente","No Cloud Run functions e no Lambda Managed Instances, um mesmo ambiente pode atender várias chamadas ao mesmo tempo."]
+  ]},
+ "Throttling":{
+  what:"Quando a concorrência chega ao limite, a plataforma recusa novas execuções até sobrar espaço.",
+  kids:[
+   ["Síncrona","Quem chamou recebe um erro 429 e decide se tenta de novo."],
+   ["Assíncrona","O evento volta para a fila interna e é tentado de novo por até seis horas."],
+   ["Vizinho barulhento","O limite é da conta inteira: uma função em pico pode deixar as outras sem espaço, se não houver concorrência reservada."]
+  ]},
+ "Cobrança por uso":{
+  what:"Sem chamadas, a conta das funções é zero. Com muitas, pode passar do custo de servidores ligados o tempo todo.",
+  kids:[
+   ["As duas partes","Um valor por milhão de chamadas e outro por GB-segundo: memória configurada vezes tempo de execução."],
+   ["Memória é CPU","No Lambda, a CPU cresce junto com a memória: com 1.769 MB, a função tem o equivalente a uma vCPU."],
+   ["Quando deixa de compensar","Tráfego alto e constante costuma sair mais barato em containers ou no Lambda Managed Instances."]
+  ]}
+},
+microvm:{
+ "Firecracker":{
+  what:"Um monitor de máquinas virtuais minimalista, escrito em Rust, que a AWS publicou como código aberto em 2018.",
+  kids:[
+   ["Só o essencial","Emula poucos dispositivos, como rede e disco, e por isso sobe rápido e ocupa pouca memória."],
+   ["Em frações de segundo","O projeto promete iniciar uma microVM em 125 ms ou menos, até o sistema dela começar a rodar."],
+   ["Quem usa","O AWS Lambda e o AWS Fargate, além de outras plataformas que executam código de terceiros."]
+  ]},
+ "Isolamento":{
+  what:"Num servidor da nuvem rodam funções de muitos clientes. Separar umas das outras é a primeira regra.",
+  kids:[
+   ["Kernel próprio","Cada microVM tem o seu kernel: quem escapa do processo continua preso na máquina virtual."],
+   ["Containers sozinhos não bastam","Containers dividem o kernel do servidor. Para código de estranhos, as nuvens põem uma camada a mais."],
+   ["Outros caminhos","O Google usa o gVisor, um kernel em espaço de usuário; o Cloudflare Workers usa isolates do V8, mais leves e com outro modelo de segurança."]
+  ]},
+ "Congelar e reaproveitar":{
+  what:"Depois que a função responde, o ambiente não morre na hora: fica congelado, à espera.",
+  kids:[
+   ["Congelado","Nada roda: timers e tarefas em segundo plano param exatamente onde estavam."],
+   ["Reaproveitado","Se outra chamada chega, o ambiente descongela e atende sem cold start."],
+   ["Descartado","Depois de um tempo sem uso, ou quando a plataforma precisa, o ambiente é destruído sem aviso."]
+  ]}
+}
+});
 })();

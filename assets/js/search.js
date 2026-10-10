@@ -10,7 +10,7 @@ const norm=s=>[...s].map(fold).join("");
 /* apelidos comuns que não aparecem no texto das peças */
 const ALIASES={k8s:"kubernetes",db:"banco",bd:"banco",lb:"balanceador",mq:"fila",auth:"autenticacao",
   ci:"pipeline",cd:"pipeline",iac:"infra como codigo",vm:"maquina virtual",az:"zona",ram:"memoria",
-  frontend:"front-end",backend:"back-end"};
+  frontend:"front-end",backend:"back-end",faas:"funcao",dlq:"mensagens mortas"};
 
 const termsOf=q=>norm(q).split(/\s+/).filter(Boolean).map(t=>ALIASES[t]||t);
 

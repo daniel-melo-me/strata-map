@@ -21,13 +21,18 @@ const checkRefs = (refs, p) => {
 
 /* ---------- index.html: arquivos locais e ordem dos scripts ---------- */
 const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
+/* sem o ?v= de versão (tools/versionar.js) */
+const noQuery = u => u.replace(/[?#].*$/, "");
+const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => noQuery(m[1]));
 const refs = [
   ...scripts,
-  ...[...html.matchAll(/<link [^>]*href="([^"]+)"/g)].map(m => m[1]),
+  ...[...html.matchAll(/<link [^>]*href="([^"]+)"/g)].map(m => noQuery(m[1])),
   ...[...html.matchAll(/content="https:\/\/strata\.dancode\.com\.br\/([^"]+)"/g)].map(m => m[1])
 ].filter(r => !/^(https?:)?\/\//.test(r));
 for (const r of refs) if (!fs.existsSync(path.join(ROOT, r))) err(`index.html cita ${r}, que não existe`);
+/* cada arquivo local precisa da versão do conteúdo atual, senão o cache mistura versões depois do deploy */
+const stale = require(path.join(ROOT, "tools/versionar.js")).versionar(html).changed;
+if (stale.length) err(`index.html com versão desatualizada de ${stale.join(", ")}: rode node tools/versionar.js`);
 
 const ORDER = ["data/base.js", "data/microsservicos.js", "data/monolito.js", "data/serverless.js", "data/zoom.js", "failure.js", "search.js", "app.js"];
 const pos = ORDER.map(f => scripts.findIndex(s => s.endsWith(f)));

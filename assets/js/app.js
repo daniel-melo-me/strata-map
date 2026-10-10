@@ -523,6 +523,14 @@ function failReport(id,r){
 /* ---------- zoom dentro do zoom ---------- */
 const zv=document.getElementById("zoomView"), zvCrumbs=document.getElementById("zvCrumbs"), zvBody=document.getElementById("zvBody"), zvBack=document.getElementById("zvBack");
 let zpath=[];
+/* ztop: o nível visível. Os outros filhos de zvBody estão saindo, numa animação.
+   zClose: fecha o zoom de vez enquanto a animação de saída está no meio. */
+let ztop=null, zClose=null;
+/* encerra a transição em andamento: só o nível atual fica, sem recorte */
+function zSettle(){
+  [...zvBody.children].forEach(s=>{ if(s!==ztop){ s.getAnimations().forEach(a=>a.cancel()); s.remove(); } });
+  if(ztop) ztop.getAnimations().forEach(a=>a.cancel());
+}
 
 /* o conteúdo de um nível: [peça], [peça, item], [peça, item, subitem] */
 function zLevel(path){
@@ -590,9 +598,10 @@ function zShow(path, st){
 /* hl: nome do cartão a destacar, quando o zoom é aberto pela busca */
 function openZoom(path, hl){
   if(!validPath(path)) return;
+  if(zClose) zClose();
   if(zv.open){ zoomTo(path); return; }
   if(jr.on) stopJourney();
-  const st=zStage(path, hl); zvBody.replaceChildren(st);
+  const st=zStage(path, hl); ztop=st; zvBody.replaceChildren(st);
   zv.showModal(); zShow(path, st);
   if(!reduce){
     const r=nodeRect(path[0]), box=zv.getBoundingClientRect();
@@ -602,35 +611,58 @@ function openZoom(path, hl){
   const hit=st.querySelector(".zv-hit"); if(hit) hit.scrollIntoView({block:"center",behavior:"auto"});
 }
 function zoomTo(path, fromEl){
-  const old=zvBody.lastElementChild, st=zStage(path);
+  if(zClose) return;
+  zSettle();
+  const old=ztop, st=zStage(path); ztop=st;
   zvBody.appendChild(st); zShow(path, st);
-  if(reduce||!fromEl){ zvBody.replaceChildren(st); return; }
+  if(reduce||!fromEl||!old){ zvBody.replaceChildren(st); return; }
+  /* o nível que sai não recebe mais cliques: um segundo clique rápido não navega por ele */
+  old.inert=true;
   const box=st.getBoundingClientRect();
   old.animate([{opacity:1,transform:"scale(1)"},{opacity:0,transform:"scale(1.06)"}],{duration:380,easing:"ease-in",fill:"forwards"});
   const a=st.animate([{clipPath:clipFrom(fromEl.getBoundingClientRect(),box)},{clipPath:"inset(0px 0px 0px 0px round 0px)"}],Z_EASE);
   after(a, Z_EASE.duration, ()=>{ a.cancel(); if(old.isConnected) old.remove(); });
 }
 function zoomUp(depth){
+  if(zClose) return;
   if(depth<=0){ closeZoom(); return; }
+  zSettle();
   const target=zpath.slice(0,depth), child=zpath[depth];
-  const cur=zvBody.lastElementChild, st=zStage(target);
+  const cur=ztop, st=zStage(target); ztop=st;
   zvBody.insertBefore(st, cur); zShow(target, st);
-  if(reduce){ cur.remove(); return; }
+  if(reduce||!cur){ if(cur) cur.remove(); return; }
+  cur.inert=true;
   const card=st.querySelector(`.zv-card[data-i="${child}"]`), box=cur.getBoundingClientRect();
   const to=card?clipFrom(card.getBoundingClientRect(),box):"inset(50% 50% 50% 50% round 14px)";
   after(cur.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:to}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"}),
     380, ()=>cur.remove());
 }
 function closeZoom(now){
-  const id=zpath[0], done=()=>{ zv.close(); zvBody.replaceChildren(); zpath=[]; setHash(state.sel||null); };
+  /* já fechando: Esc ou clique repetido não reinicia a animação; "now" termina na hora */
+  if(zClose){ if(now) zClose(); return; }
+  const id=zpath[0]; let anim=null;
+  const done=()=>{
+    if(!zClose) return; zClose=null;
+    if(anim) anim.cancel();
+    zv.close(); zvBody.replaceChildren(); ztop=null; zpath=[]; setHash(state.sel||null);
+  };
+  zClose=done;
   if(now||reduce||!el[id]){ done(); return; }
+  zSettle();
   const box=zv.getBoundingClientRect();
-  const anim=zv.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clipFrom(nodeRect(id),box)}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
-  after(anim, 380, ()=>{ done(); anim.cancel(); });
+  anim=zv.animate([{clipPath:"inset(0px 0px 0px 0px round 0px)"},{clipPath:clipFrom(nodeRect(id),box)}],{duration:380,easing:"cubic-bezier(.5,0,.75,0)",fill:"forwards"});
+  after(anim, 380, done);
 }
 document.getElementById("zvClose").onclick=()=>closeZoom();
 zvBack.onclick=()=>zoomUp(zpath.length-1);
-zv.addEventListener("cancel",e=>{ e.preventDefault(); zoomUp(zpath.length-1); });
+/* Esc sobe um nível. Depois de vários Esc seguidos o navegador deixa de aceitar o preventDefault
+   e fecha o dialog sozinho; o evento "close" garante a mesma limpeza do nosso fechamento. */
+zv.addEventListener("cancel",e=>{ if(!e.cancelable) return; e.preventDefault(); zoomUp(zpath.length-1); });
+zv.addEventListener("close",()=>{
+  if(zClose){ zClose(); return; }
+  if(zv.open||!zpath.length) return;
+  zvBody.replaceChildren(); ztop=null; zpath=[]; setHash(state.sel||null);
+});
 
 /* ---------- deep link: #id abre a peça; #falha-id derruba; #zoom-id-1-2 abre o zoom ---------- */
 function fromHash(){

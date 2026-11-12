@@ -202,6 +202,8 @@ svg.packets{z-index:4}
 @keyframes rise{40%{transform:translateY(-5px)}}
 /* persona fora de foco vence o realce de eixo */
 .map .node.is-off{opacity:.18}
+/* a peça aberta nunca fica apagada, nem por um eixo ligado */
+.map .node.is-sel{opacity:1}
 
 /* wires */
 .wire{fill:none;stroke-width:1.4;opacity:.5;transition:opacity .2s, stroke-width .2s}

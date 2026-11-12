@@ -206,14 +206,17 @@ function refresh(){
   Object.entries(el).forEach(([id,b])=>{
     b.classList.toggle("is-sel",id===state.sel);
     b.classList.toggle("is-dim",!!state.sel&&!near.has(id));
-    b.classList.toggle("is-off",!!state.persona&&!(N[id].who||[]).includes(state.persona));
+    /* com uma peça aberta, o foco é ela e as vizinhas; a persona volta a apagar quando o painel fecha */
+    b.classList.toggle("is-off",!state.sel&&!!state.persona&&!(N[id].who||[]).includes(state.persona));
   });
+  /* pelos olhos de um papel: só as linhas entre peças desse papel ficam fortes */
+  const mine=!state.sel&&state.persona?new Set(Object.keys(N).filter(id=>(N[id].who||[]).includes(state.persona))):null;
   E.forEach(e=>{
     const vis=state.runs||e[2]!=="run";
     e.path.classList.toggle("hidden",!vis);
     const inc=state.sel&&(e[0]===state.sel||e[1]===state.sel)&&vis;
     e.path.classList.toggle("hot",!!inc);
-    e.path.classList.toggle("cold",!!state.sel&&!inc);
+    e.path.classList.toggle("cold",(!!state.sel&&!inc)||(!!mine&&!(mine.has(e[0])&&mine.has(e[1]))));
     e.label.classList.toggle("show",!!inc);
   });
   map.classList.remove("ax-on-seg","ax-on-obs","ax-on-res");
@@ -364,6 +367,8 @@ Object.entries(PERSONAS).forEach(([k,v])=>psel.add(new Option(v[0],k)));
 psel.onchange=()=>setPersona(psel.value||null);
 function setPersona(k){
   if(k&&fail.on) exitFail();
+  /* escolher um papel é pedir para ver as peças dele: o painel aberto sairia na frente */
+  if(k&&state.sel) closePanel();
   state.persona=k; psel.value=k||"";
   psel.closest(".select").classList.toggle("on",!!k);
   document.querySelectorAll("#panel [data-persona]").forEach(c=>c.setAttribute("aria-pressed",String(c.dataset.persona===k)));

@@ -305,6 +305,22 @@ satelite:{l:"fis",n:"Satélite",t:"Internet vinda do espaço",
  ["navegador","usuario","O front-end desenha a lista na tela. Do toque até aqui, cerca de 200 milissegundos.",16]
  ],
 
+ /* A história da Ana: a mesma consulta, contada em poucos passos para quem está começando.
+  * [de, para, narração, milissegundos (a soma bate com a da jornada), extra?]
+  * extra = {via?: peças do meio, para o pacote seguir as linhas; p, o: [3 opções], c: índice da certa, why: pergunta do passo} */
+ tour:[
+ ["usuario","navegador","A Ana abre o app da loja e toca em “Meus pedidos”. O celular transforma o toque num pedido para a internet.",15,{via:["dispositivo"]}],
+ ["navegador","dns","Primeiro, o app precisa saber onde a loja mora. Ele pergunta ao DNS, que traduz o nome da loja num endereço, como a lista de contatos do celular.",30,{p:"O que o DNS faz?",o:["Guarda os pedidos da Ana", "Traduz o nome do site no endereço do servidor", "Deixa a internet mais rápida"],c:1,why:"O DNS é a lista telefônica da internet: troca nomes como api.loja.com pelo endereço IP do servidor."}],
+ ["navegador","fibra","O pedido sai cifrado pelo Wi-Fi, passa pela operadora de internet e viaja como luz numa fibra óptica até o data center.",25,{via:["roteador", "provedor"]}],
+ ["fibra","gateway","Na nuvem, um filtro barra ataques, o balanceador escolhe uma cópia livre e o API Gateway, a portaria do sistema, decide para onde o pedido vai.",8,{via:["waf", "lb"]}],
+ ["gateway","idp","A portaria confere o crachá digital da Ana, um token, para saber que é ela mesma e que pode ver esses pedidos.",2],
+ ["gateway","pedidos","O pedido segue até o serviço de pedidos: um programa pequeno que só cuida de pedidos, com banco próprio. Cada parte da loja é um serviço separado.",5,{via:["bff"],p:"Se o serviço de pagamentos cair agora, a Ana ainda vê os pedidos?",o:["Não, cai tudo junto", "Sim, cada serviço roda separado", "Só depois de reiniciar o celular"],c:1,why:"Em microsserviços cada parte é um programa independente: pagamentos fora do ar não derruba a consulta de pedidos."}],
+ ["pedidos","oltp","O serviço olha primeiro no cache, uma memória rápida. Os pedidos não estão lá, então ele busca no banco de dados.",27],
+ ["pedidos","kafka","Com os pedidos em mãos, o serviço guarda uma cópia no cache para a próxima vez e deixa um aviso num mural de eventos, sem esperar ninguém.",8],
+ ["pedidos","navegador","A resposta volta pelo caminho: a camada que monta a tela, a portaria, a fibra, a operadora e o Wi-Fi.",44,{via:["bff", "gateway", "lb", "tls"]}],
+ ["navegador","usuario","A tela mostra os pedidos da Ana. Cerca de 180 milissegundos: alguns saltos a mais pela rede que no monólito, em troca de partes independentes.",16,{via:["dispositivo"]}]
+ ],
+
  /* Modo falha.
   * deps:   [dependente, dependência, efeito, motivo]. Quem precisa de quem, não o caminho da requisição.
   *         para    = sem a dependência, o dependente deixa de funcionar

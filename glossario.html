@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script>/* aplica o tema escolhido antes de pintar, para não piscar no tema errado */
+try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Glossário — Strata Map</title>
+<meta name="description" content="Os termos técnicos do Strata Map em linguagem simples, do DNS ao cold start, com link para cada peça no mapa.">
+<link rel="canonical" href="https://strata.dancode.com.br/glossario.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Strata Map">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Glossário do Strata Map">
+<meta property="og:description" content="Os termos técnicos do software, em linguagem simples.">
+<meta property="og:image" content="https://strata.dancode.com.br/assets/img/og.png">
+<link rel="icon" href="assets/img/favicon.svg?v=a3e797810d" type="image/svg+xml">
+<link rel="icon" href="assets/img/favicon-32.png?v=804d175578" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=0643dacbc8">
+<meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1015" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css?v=d9b599b22f">
+</head>
+<body class="doc">
+<header class="doc-top">
+  <a class="logo" href="index.html" aria-label="Strata Map, voltar ao mapa">
+    <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><clipPath id="sm-c"><rect width="64" height="64" rx="15"/></clipPath>
+    <linearGradient id="sm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2938"/><stop offset="1" stop-color="#101820"/></linearGradient></defs>
+    <g clip-path="url(#sm-c)"><rect width="64" height="64" fill="url(#sm-sky)"/>
+    <path d="M0 25 C14 20 30 29 64 22 V64 H0Z" fill="#4A8FE8"/><path d="M0 35 C16 30 34 39 64 32 V64 H0Z" fill="#8058E8"/>
+    <path d="M0 45 C16 40 36 49 64 42 V64 H0Z" fill="#119C88"/><path d="M0 55 C18 51 38 58 64 52 V64 H0Z" fill="#B97B5A"/>
+    <path d="M40 15 V64" stroke="#fff" stroke-width="3.4"/><circle cx="40" cy="14" r="6.5" fill="#fff"/><circle cx="40" cy="14" r="2.6" fill="#101820"/></g>
+    </svg>
+    <b>Strata Map</b>
+  </a>
+  <nav class="doc-nav" aria-label="Páginas">
+    <a href="index.html">Mapa</a>
+    <a href="glossario.html" aria-current="page">Glossário</a>
+    <a href="professores.html">Para professores</a>
+  </nav>
+</header>
+
+<main class="doc-main">
+  <p class="eyebrow">Glossário</p>
+  <h1>Os termos do software, sem complicar</h1>
+  <p class="lede">Cada termo técnico que aparece no mapa, numa frase ou duas. No mapa, os termos sublinhados abrem a definição ali mesmo; aqui, você vê todos juntos e pula para a peça de cada um.</p>
+
+  <label class="doc-filter">
+    <span class="sr-only">Filtrar termos</span>
+    <input id="gq" type="search" placeholder="Filtrar: DNS, cache, token…" autocomplete="off">
+  </label>
+  <nav class="doc-letters" id="gletters" aria-label="Ir para a letra"></nav>
+  <div id="glist" class="gl-list"></div>
+  <p class="doc-empty" id="gempty" hidden>Nenhum termo com esse nome.</p>
+</main>
+
+<script src="assets/js/data/base.js?v=44cd45266f"></script>
+<script src="assets/js/data/microsservicos.js?v=efcc399d62"></script>
+<script src="assets/js/data/monolito.js?v=cf55b222ba"></script>
+<script src="assets/js/data/serverless.js?v=3ce6bf5219"></script>
+<script src="assets/js/data/glossario.js?v=4a5853db30"></script>
+<script src="assets/js/glossario-page.js?v=16251072b5"></script>
+</body>
+</html>

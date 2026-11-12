@@ -195,6 +195,23 @@ satelite:pick("satelite")
  ["navegador","usuario","A tela mostra os pedidos. Do toque até aqui, cerca de 400 milissegundos, e mais da metade foi o cold start. Na próxima vez, com o ambiente aquecido, o mesmo caminho leva perto de 160.",16]
  ],
 
+ /* A história da Ana: a mesma consulta, contada em poucos passos para quem está começando.
+  * [de, para, narração, milissegundos (a soma bate com a da jornada), extra?]
+  * extra = {via?: peças do meio, para o pacote seguir as linhas; p, o: [3 opções], c: índice da certa, why: pergunta do passo} */
+ tour:[
+ ["usuario","navegador","A Ana abre o app da loja e toca em “Meus pedidos”. O celular transforma o toque num pedido para a internet.",15,{via:["dispositivo"]}],
+ ["navegador","dns","Primeiro, o app precisa saber onde a loja mora. Ele pergunta ao DNS, que traduz o nome da loja num endereço, como a lista de contatos do celular.",30],
+ ["navegador","fibra","O pedido sai cifrado pelo Wi-Fi, passa pela operadora de internet e viaja como luz numa fibra óptica até o data center.",25,{via:["roteador", "provedor"]}],
+ ["fibra","gateway","Na nuvem, um filtro barra ataques e o API Gateway, a portaria, recebe o pedido. Aqui ninguém do time cuida de servidor: a portaria é do provedor.",6,{via:["waf"]}],
+ ["gateway","idp","A portaria confere o crachá digital da Ana, um token, para saber que é ela mesma.",2],
+ ["gateway","runtime","A portaria pede à plataforma de funções que rode a função de pedidos. Funções só existem quando alguém chama.",2,{p:"O que quer dizer serverless?",o:["Que não existe servidor nenhum", "Que o servidor existe, mas quem cuida dele é o provedor", "Que o site roda no celular da Ana"],c:1,why:"As funções rodam em servidores do provedor. O time escreve o código; servidores, escala e sistema operacional são problema do provedor."}],
+ ["runtime","microvm","Ninguém chamava essa função havia um tempo, então a plataforma prepara um ambiente do zero: o cold start. É a parte mais demorada da viagem.",250,{p:"Por que esta chamada demorou mais que as outras etapas?",o:["A internet da Ana estava lenta", "A função precisou ser preparada do zero", "O banco de dados estava cheio"],c:1,why:"É o cold start: sem ambiente pronto, a plataforma sobe uma máquina minúscula, carrega o código e inicia a função."}],
+ ["fnpedidos","nosql","A função acorda e busca os pedidos da Ana num banco de dados que cresce sozinho conforme o uso.",9],
+ ["fnpedidos","barramento","Antes de responder, a função deixa um aviso no mural de eventos. Depois da resposta, ela pode ser congelada a qualquer momento.",10],
+ ["fnpedidos","navegador","A resposta volta pela portaria e pela internet até o celular da Ana.",42,{via:["gateway", "tls"]}],
+ ["navegador","usuario","A tela mostra os pedidos da Ana. Cerca de 400 milissegundos, e mais da metade foi o cold start. Na próxima vez, com a função já acordada, leva perto de 160.",16,{via:["dispositivo"]}]
+ ],
+
  /* Modo falha: mesmo formato de microsservicos.js. */
  failure:{
   samples:["runtime","fnpagamentos","oltp","filas","externas","datacenter"],

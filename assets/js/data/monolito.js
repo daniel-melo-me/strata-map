@@ -163,6 +163,22 @@ satelite:pick("satelite")
  ["navegador","usuario","A tela mostra os pedidos. Do toque até aqui, cerca de 170 milissegundos: sem saltos de rede entre serviços, o caminho interno fica mais curto.",16]
  ],
 
+ /* A história da Ana: a mesma consulta, contada em poucos passos para quem está começando.
+  * [de, para, narração, milissegundos (a soma bate com a da jornada), extra?]
+  * extra = {via?: peças do meio, para o pacote seguir as linhas; p, o: [3 opções], c: índice da certa, why: pergunta do passo} */
+ tour:[
+ ["usuario","navegador","A Ana abre o app da loja e toca em “Meus pedidos”. O celular transforma o toque num pedido para a internet.",15,{via:["dispositivo"]}],
+ ["navegador","dns","Primeiro, o app precisa saber onde a loja mora. Ele pergunta ao DNS, que traduz loja.com num endereço, como a lista de contatos do celular.",30,{p:"O que o DNS faz?",o:["Guarda os pedidos da Ana", "Traduz o nome do site no endereço do servidor", "Deixa a internet mais rápida"],c:1,why:"O DNS é a lista telefônica da internet: troca nomes como loja.com pelo endereço IP do servidor."}],
+ ["navegador","fibra","O pedido sai cifrado pelo Wi-Fi, passa pela operadora de internet e viaja como luz numa fibra óptica até o data center.",25,{via:["roteador", "provedor"]}],
+ ["fibra","lb","Na entrada da nuvem, um filtro de segurança barra ataques, e o balanceador escolhe uma das cópias do sistema que está livre.",5,{via:["waf"],p:"Por que existem várias cópias do sistema atrás do balanceador?",o:["Para cada cliente ter a sua", "Para dividir o trabalho e continuar no ar se uma cópia cair", "Para guardar backups"],c:1,why:"O balanceador divide os pedidos entre as cópias e tira do caminho a que parar de responder."}],
+ ["lb","app","O pedido chega ao monólito: um único programa com todas as partes da loja dentro. Ele olha o endereço /pedidos e sabe qual parte chamar.",1],
+ ["app","auth","Antes de tudo, a parte de login confere se é mesmo a Ana. A sessão dela está guardada numa memória rápida, o cache.",2],
+ ["pedidos","oltp","A parte de pedidos busca no banco de dados os pedidos da Ana. Um índice, como o de um livro, acha só os dela entre milhões.",25,{p:"Para que serve o índice no banco de dados?",o:["Para achar os dados rápido sem ler a tabela inteira", "Para guardar as senhas", "Para fazer backup"],c:0,why:"Sem índice, o banco leria todos os pedidos de todos os clientes para achar os da Ana."}],
+ ["oltp","app","O banco devolve a lista, e o monólito monta a resposta. Tudo acontece dentro do mesmo programa, sem conversar pela rede.",5,{via:["pedidos"]}],
+ ["app","navegador","A resposta faz o caminho de volta: balanceador, fibra, operadora e Wi-Fi, cifrada o tempo todo.",42,{via:["lb", "tls"]}],
+ ["navegador","usuario","A tela mostra os pedidos da Ana. Do toque até aqui, cerca de 170 milissegundos: mais ou menos o tempo de uma piscada.",16,{via:["dispositivo"]}]
+ ],
+
  /* Modo falha: mesmo formato de microsservicos.js.
   * O 5º campo "raiz" faz a dependência valer só quando a própria peça é a que caiu:
   * um módulo em pane (memória, threads) derruba o processo, mas um módulo que só

@@ -36,7 +36,7 @@ Quanto mais fundo, mais longe do usuário.
 
 ## 🔍 Cada peça abre por dentro
 
-Ao tocar em qualquer componente, você vê:
+Ao tocar em qualquer componente, a explicação vem em níveis: primeiro **em uma frase** e **como funciona**, com uma analogia do dia a dia; depois quem cuida e o que acontece se cair; e, recolhido em **Para ir além**, o conteúdo técnico:
 
 - **Por dentro:** do que ele é feito
 - **Tecnologias reais:** o que o mercado usa de fato
@@ -45,6 +45,8 @@ Ao tocar em qualquer componente, você vê:
 - **Se cair:** o que acontece com o resto do sistema
 - **Conversa com:** as peças ligadas a ele
 - **Fontes:** links para a documentação oficial ou a fonte primária de cada número, data e limite citado
+
+Os termos técnicos vêm sublinhados: um toque abre a definição em linguagem simples. Todos estão no [glossário](glossario.html). As peças abertas ganham um ✓ no mapa, e o painel inicial mostra quantas você já explorou.
 
 ---
 
@@ -62,11 +64,11 @@ As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e 
 
 ### ▶️ A jornada de um clique
 
-Acompanhe uma requisição real atravessando todas as camadas, em até 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo: cerca de **170 milissegundos** no monólito e **180** em microsserviços. No serverless, a mesma consulta com cold start passa de **400**.
+Por padrão, a viagem é a **história da Ana**: ela abre os pedidos no app, e a mensagem atravessa o sistema em 10 ou 11 passos, com perguntas rápidas no caminho e um resumo no fim. Quem quiser troca para a versão completa, com até 24 passos técnicos: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo: cerca de **170 milissegundos** no monólito e **180** em microsserviços. No serverless, a mesma consulta com cold start passa de **400**.
 
 ### ⚡ Modo falha
 
-Derrube qualquer peça e veja a cascata: quem para junto, quem só degrada, quem congela (o que roda continua, só as mudanças param) e quem segura o tranco, como a fila que guarda os eventos até o consumidor voltar. No fim, o veredito: o usuário percebe ou não?
+Derrube qualquer peça e, antes de ver a cascata, aposte no que a pessoa usando o app vai perceber (dá para desligar o desafio). Depois, veja quem para junto, quem só degrada, quem congela (o que roda continua, só as mudanças param) e quem segura o tranco, como a fila que guarda os eventos até o consumidor voltar. No fim, o veredito: o usuário percebe ou não?
 
 Cada queda também mostra o que aconteceria nos outros estilos: no monólito, um módulo com vazamento de memória derruba o processo inteiro; em microsserviços, a mesma falha só degrada. No serverless, a fila e o orquestrador seguram o trabalho enquanto uma função está fora.
 
@@ -153,6 +155,8 @@ assets/js/data/base.js         camadas, personas e eixos (comuns a todos os esti
 assets/js/data/microsservicos.js  peças, conexões, jornada e falhas do estilo microsserviços
 assets/js/data/monolito.js     o mesmo para o monólito, reaproveitando as peças comuns
 assets/js/data/serverless.js   o mesmo para o serverless, também reaproveitando as peças comuns
+assets/js/data/niveis.js       explicação em níveis de cada peça: em uma frase e a analogia
+assets/js/data/glossario.js    os termos técnicos em linguagem simples
 assets/js/data/zoom.js         o que existe por dentro de cada parte das peças (zoom dentro do zoom)
 assets/js/failure.js           cálculo da cascata do modo falha
 assets/js/search.js            busca rápida por nome, tecnologia e conteúdo das peças
@@ -160,11 +164,14 @@ assets/js/app.js               render do mapa, painel, filtros, jornada e modo f
 assets/img/                    favicon, ícone para iOS e imagem de prévia (og.png)
 tools/og-image.html            fonte da imagem de prévia; o comando para regenerar está no arquivo
 tests/validate.js              valida peças, conexões, jornadas, modo falha, zoom, busca e arquivos citados
-tools/versionar.js             versiona os arquivos citados no index.html pelo conteúdo
+tools/versionar.js             versiona os arquivos citados nas páginas pelo conteúdo
+glossario.html                 página do glossário (lista, filtro e links para as peças)
+professores.html               roteiros por tema, atividades prontas e modo apresentação
+assets/js/glossario-page.js    monta a página do glossário a partir dos dados
 .github/workflows/validar.yml  roda a validação a cada push e pull request
 ```
 
-Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges`, `journey` e `failure` (dependências e redundâncias do modo falha), seguindo o formato de `microsservicos.js`.
+Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/` que registre `STRATA.styles.<nome>` com `nodes`, `edges`, `journey`, `tour` (a história da Ana) e `failure` (dependências e redundâncias do modo falha), seguindo o formato de `microsservicos.js`.
 
 ---
 
@@ -179,6 +186,8 @@ Para criar um novo estilo arquitetural, adicione um arquivo em `assets/js/data/`
 - [ ] Linha do tempo: como as arquiteturas evoluíram, e por quê
 - [ ] Custo e trade-off por componente
 - [x] Modo falha: simular a queda de uma peça e ver o impacto
+- [x] Para iniciantes: explicação em níveis, glossário, história da Ana com perguntas e desafio no modo falha
+- [x] Para professores: roteiros por tema, atividades prontas, links por papel (`?papel=`) e modo apresentação
 
 ---
 

@@ -32,7 +32,7 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=1d809e208c">
+<link rel="stylesheet" href="assets/css/styles.css?v=d9b599b22f">
 </head>
 <body>
 <header class="top">
@@ -74,6 +74,7 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
       <ul class="paths">
         <li><b>Novo em tecnologia?</b> Dispare um clique e acompanhe a viagem, camada por camada.</li>
         <li><b>Já trabalha na área?</b> Abra as peças, veja pelos olhos de cada papel e derrube peças no Modo falha.</li>
+        <li><b>Dá aula?</b> Veja <a href="professores.html">roteiros prontos para professores</a> e o <a href="glossario.html">glossário</a>.</li>
       </ul>
       <div class="cta">
         <button class="btn-main" data-play><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg>Disparar um clique</button>
@@ -151,6 +152,11 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
       <div>
         <b>Strata Map</b>
         <span>O software por inteiro, do clique à infraestrutura física.</span>
+        <nav class="cr-site" aria-label="Páginas do Strata Map">
+          <a href="glossario.html">Glossário</a>
+          <a href="professores.html">Para professores</a>
+          <a href="?apresentar">Modo apresentação</a>
+        </nav>
       </div>
     </div>
     <div class="cr-author">
@@ -195,9 +201,11 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 </dialog>
 
 <div class="narr" id="narr" role="status">
-  <div class="meta"><span id="nStep"></span><span id="nMs"></span></div>
+  <div class="meta"><span id="nStep"></span><button class="n-mode" id="nMode" type="button"></button><span id="nMs"></span></div>
   <div class="bar" id="nBarWrap" title="Clique para pular para esse ponto da jornada"><i id="nBar"></i></div>
   <p id="nText"></p>
+  <div class="quiz" id="nQuiz" hidden></div>
+  <div class="n-end" id="nEnd" hidden></div>
   <div class="row">
     <button id="nPrev">Voltar</button>
     <button id="nPause">Pausar</button>
@@ -208,12 +216,14 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 </div>
 
 <script src="assets/js/data/base.js?v=44cd45266f"></script>
-<script src="assets/js/data/microsservicos.js?v=53341b8a5d"></script>
-<script src="assets/js/data/monolito.js?v=f3d7b029af"></script>
-<script src="assets/js/data/serverless.js?v=3b4d360ee6"></script>
+<script src="assets/js/data/microsservicos.js?v=efcc399d62"></script>
+<script src="assets/js/data/monolito.js?v=cf55b222ba"></script>
+<script src="assets/js/data/serverless.js?v=3ce6bf5219"></script>
+<script src="assets/js/data/niveis.js?v=fe9c1acd8f"></script>
+<script src="assets/js/data/glossario.js?v=4a5853db30"></script>
 <script src="assets/js/data/zoom.js?v=bf6a3f8425"></script>
 <script src="assets/js/failure.js?v=c225668f3c"></script>
 <script src="assets/js/search.js?v=a919bf47f3"></script>
-<script src="assets/js/app.js?v=742e156147"></script>
+<script src="assets/js/app.js?v=0fae33822c"></script>
 </body>
 </html>

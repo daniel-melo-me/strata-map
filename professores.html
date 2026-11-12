@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script>/* aplica o tema escolhido antes de pintar, para não piscar no tema errado */
+try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Para professores — Strata Map</title>
+<meta name="description" content="Roteiros por tema, atividades prontas e modo apresentação para ensinar como um software funciona de ponta a ponta com o Strata Map.">
+<link rel="canonical" href="https://strata.dancode.com.br/professores.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Strata Map">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Strata Map para professores">
+<meta property="og:description" content="Roteiros por tema, atividades prontas e modo apresentação para usar o Strata Map em aula.">
+<meta property="og:image" content="https://strata.dancode.com.br/assets/img/og.png">
+<link rel="icon" href="assets/img/favicon.svg?v=a3e797810d" type="image/svg+xml">
+<link rel="icon" href="assets/img/favicon-32.png?v=804d175578" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=0643dacbc8">
+<meta name="theme-color" content="#F7F8FA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1015" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css?v=d9b599b22f">
+</head>
+<body class="doc">
+<header class="doc-top">
+  <a class="logo" href="index.html" aria-label="Strata Map, voltar ao mapa">
+    <svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true">
+    <defs><clipPath id="sm-c"><rect width="64" height="64" rx="15"/></clipPath>
+    <linearGradient id="sm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C2938"/><stop offset="1" stop-color="#101820"/></linearGradient></defs>
+    <g clip-path="url(#sm-c)"><rect width="64" height="64" fill="url(#sm-sky)"/>
+    <path d="M0 25 C14 20 30 29 64 22 V64 H0Z" fill="#4A8FE8"/><path d="M0 35 C16 30 34 39 64 32 V64 H0Z" fill="#8058E8"/>
+    <path d="M0 45 C16 40 36 49 64 42 V64 H0Z" fill="#119C88"/><path d="M0 55 C18 51 38 58 64 52 V64 H0Z" fill="#B97B5A"/>
+    <path d="M40 15 V64" stroke="#fff" stroke-width="3.4"/><circle cx="40" cy="14" r="6.5" fill="#fff"/><circle cx="40" cy="14" r="2.6" fill="#101820"/></g>
+    </svg>
+    <b>Strata Map</b>
+  </a>
+  <nav class="doc-nav" aria-label="Páginas">
+    <a href="index.html">Mapa</a>
+    <a href="glossario.html">Glossário</a>
+    <a href="professores.html" aria-current="page">Para professores</a>
+  </nav>
+</header>
+
+<main class="doc-main">
+  <p class="eyebrow">Para professores</p>
+  <h1>O software por inteiro, em sala de aula</h1>
+  <p class="lede">O Strata Map mostra como um software funciona do toque na tela até a fibra óptica, e o mesmo sistema montado de três jeitos. É gratuito, não pede cadastro e funciona no navegador do computador e do celular. Abaixo, roteiros por tema e atividades prontas, com links que já abrem o mapa no ponto certo.</p>
+
+  <section class="doc-sec">
+    <h2>Como usar em aula</h2>
+    <ul class="doc-tips">
+      <li><b>Comece pela história da Ana.</b> O botão “Disparar um clique” conta, em 10 passos, o que acontece quando a Ana abre os pedidos dela no app, com perguntas no caminho. Quem quiser vê a versão completa, com todos os passos técnicos.</li>
+      <li><b>Cada peça tem três níveis.</b> Primeiro uma frase simples e uma analogia; depois quem cuida e o que acontece se ela cair; por fim, recolhido em “Para ir além”, o conteúdo técnico com tecnologias reais e fontes.</li>
+      <li><b>Todo link abre o mapa no ponto certo.</b> Uma peça (<code>#dns</code>), uma queda no Modo falha (<code>#falha-oltp</code>), um nível de zoom (<code>#zoom-oltp-0</code>) ou o mapa pelos olhos de um papel (<code>?papel=dba</code>). Copie da barra do navegador e mande para a turma.</li>
+      <li><b>Para projetar, use o <a href="index.html?apresentar">modo apresentação</a>.</b> Os textos ficam maiores e o rodapé some. Para ampliar ainda mais, use o zoom do navegador (⌘ + no Mac, Ctrl + no Windows).</li>
+      <li><b>O progresso fica no navegador do aluno.</b> As peças abertas ganham um ✓ no mapa. Não há login nem coleta de dados.</li>
+    </ul>
+  </section>
+
+  <section class="doc-sec">
+    <h2>Roteiros por tema</h2>
+    <div class="doc-cards">
+      <article class="doc-card">
+        <h3>Redes e internet</h3>
+        <p>Como a mensagem sai do celular e chega ao servidor: nomes, endereços, cifra e os meios físicos.</p>
+        <ul>
+          <li><a href="index.html?estilo=monolito#dns">DNS: a lista telefônica da internet</a></li>
+          <li><a href="index.html?estilo=monolito#tls">HTTPS e TLS: a conversa cifrada</a></li>
+          <li><a href="index.html?estilo=monolito#roteador">Wi-Fi e roteador</a> e <a href="index.html?estilo=monolito#provedor">provedor de internet</a></li>
+          <li><a href="index.html?estilo=monolito#fibra">Fibra óptica</a> e <a href="index.html?estilo=monolito#satelite">satélite</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Segurança</h3>
+        <p>As barreiras de cada camada, do filtro na entrada à rede privada.</p>
+        <ul>
+          <li><a href="index.html?estilo=microsservicos#waf">WAF: o segurança da porta</a></li>
+          <li><a href="index.html?estilo=microsservicos#idp">Identidade e tokens</a> e, no monólito, <a href="index.html?estilo=monolito#auth">login e sessão</a></li>
+          <li><a href="index.html?estilo=microsservicos#vpc">Rede virtual: o condomínio fechado</a></li>
+          <li><a href="index.html?estilo=microsservicos&amp;papel=si">O mapa pelos olhos de Segurança da informação</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Bancos de dados</h3>
+        <p>Onde a informação mora e por que existem tantos tipos de banco.</p>
+        <ul>
+          <li><a href="index.html?estilo=monolito#oltp">Banco relacional</a> e <a href="index.html?estilo=monolito#zoom-oltp-0">tabelas e índices, por dentro</a></li>
+          <li><a href="index.html?estilo=microsservicos#cache">Cache</a> e <a href="index.html?estilo=microsservicos#nosql">banco NoSQL</a></li>
+          <li><a href="index.html?estilo=microsservicos#busca">Motor de busca</a> e <a href="index.html?estilo=microsservicos#lake">data lake</a></li>
+          <li><a href="index.html?estilo=monolito&amp;papel=dba">O mapa pelos olhos de DBA</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Arquitetura de software</h3>
+        <p>O mesmo sistema em três estilos, do mais simples ao mais distribuído.</p>
+        <ul>
+          <li><a href="index.html?estilo=monolito#app">Monólito: um programa com tudo dentro</a></li>
+          <li><a href="index.html?estilo=microsservicos#pedidos">Microsserviços: uma parte por serviço</a> e o <a href="index.html?estilo=microsservicos#kafka">barramento de eventos</a></li>
+          <li><a href="index.html?estilo=serverless#fnpedidos">Serverless: funções sob demanda</a> e a <a href="index.html?estilo=serverless#runtime">plataforma de funções</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Resiliência e falhas</h3>
+        <p>O que cai junto quando uma peça cai, e o que segura o tranco.</p>
+        <ul>
+          <li><a href="index.html?estilo=monolito#falha-oltp">O banco do monólito caiu</a></li>
+          <li><a href="index.html?estilo=microsservicos#falha-kafka">O barramento de eventos caiu</a></li>
+          <li><a href="index.html?estilo=serverless#falha-runtime">A plataforma de funções caiu</a></li>
+          <li><a href="index.html?estilo=microsservicos#falha-datacenter">Um data center inteiro caiu</a></li>
+        </ul>
+      </article>
+      <article class="doc-card">
+        <h3>Nuvem e infraestrutura</h3>
+        <p>O que existe por baixo da nuvem: pacotes, orquestração, máquinas e prédios.</p>
+        <ul>
+          <li><a href="index.html?estilo=microsservicos#container">Container</a> e <a href="index.html?estilo=microsservicos#k8s">Kubernetes</a></li>
+          <li><a href="index.html?estilo=microsservicos#vm">Máquina virtual</a> e <a href="index.html?estilo=serverless#microvm">microVM</a></li>
+          <li><a href="index.html?estilo=microsservicos#regiao">Região e zonas</a> e <a href="index.html?estilo=microsservicos#datacenter">data center</a></li>
+          <li><a href="index.html?estilo=microsservicos&amp;papel=infra">O mapa pelos olhos de Infra e redes</a></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="doc-sec">
+    <h2>Atividades prontas</h2>
+    <div class="doc-acts">
+      <article class="doc-act">
+        <p class="doc-time">15 minutos · individual</p>
+        <h3>A viagem de um clique</h3>
+        <ol>
+          <li>Cada aluno abre o <a href="index.html?estilo=monolito">mapa no monólito</a> e dispara um clique.</li>
+          <li>Segue a história da Ana e responde às perguntas do caminho.</li>
+          <li>No fim, cada um explica um passo com as próprias palavras, sem usar o termo técnico.</li>
+        </ol>
+      </article>
+      <article class="doc-act">
+        <p class="doc-time">20 minutos · em grupos</p>
+        <h3>Derrube três peças</h3>
+        <ol>
+          <li>No <a href="index.html?estilo=microsservicos">mapa em microsserviços</a>, ligue o Modo falha com “Tentar adivinhar antes”.</li>
+          <li>Cada grupo derruba três peças: um banco, o barramento de eventos e um data center. Antes de ver a cascata, aposta no que a pessoa usando o app vai perceber.</li>
+          <li>O grupo explica por que acertou ou errou, e desliga a redundância para ver a diferença.</li>
+        </ol>
+      </article>
+      <article class="doc-act">
+        <p class="doc-time">30 minutos · em duplas</p>
+        <h3>O mesmo sistema, três jeitos</h3>
+        <ol>
+          <li>As duplas seguem a história da Ana em <a href="index.html?estilo=monolito">monólito</a>, <a href="index.html?estilo=microsservicos">microsserviços</a> e <a href="index.html?estilo=serverless">serverless</a>, anotando o tempo total e as peças.</li>
+          <li>Comparam o que acontece quando pagamentos cai: <a href="index.html?estilo=monolito#falha-pagamentos">no monólito</a>, <a href="index.html?estilo=microsservicos#falha-pagamentos">em microsserviços</a> e <a href="index.html?estilo=serverless#falha-fnpagamentos">no serverless</a>.</li>
+          <li>Fecham com uma frase: quando cada estilo vale a pena?</li>
+        </ol>
+      </article>
+      <article class="doc-act">
+        <p class="doc-time">20 minutos · em grupos</p>
+        <h3>Quem cuida do quê</h3>
+        <ol>
+          <li>Cada grupo escolhe um papel em “Ver pelos olhos de”, por exemplo <a href="index.html?estilo=microsservicos&amp;papel=back">Dev back-end</a>, <a href="index.html?estilo=microsservicos&amp;papel=sre">SRE</a> ou <a href="index.html?estilo=microsservicos&amp;papel=ux">Produto e UX</a>.</li>
+          <li>Lista as peças que acendem e abre duas delas.</li>
+          <li>Apresenta para a turma como seria um dia de trabalho dessa pessoa.</li>
+        </ol>
+      </article>
+      <article class="doc-act">
+        <p class="doc-time">45 minutos · projeto</p>
+        <h3>Escolha a arquitetura</h3>
+        <ol>
+          <li>Cada grupo recebe um cenário: uma loja pequena com três pessoas desenvolvendo; um app com picos enormes na Black Friday; uma empresa com dez times mexendo no mesmo sistema.</li>
+          <li>Escolhe o estilo e justifica usando o mapa: peças, tempo da jornada, o que cai junto e quem precisa cuidar de quê.</li>
+          <li>A turma debate: não existe resposta única, existem trocas.</li>
+        </ol>
+      </article>
+    </div>
+  </section>
+
+  <section class="doc-sec">
+    <h2>Mais material</h2>
+    <ul class="doc-tips">
+      <li><a href="glossario.html">Glossário</a>: os termos técnicos do mapa em linguagem simples, para indicar à turma.</li>
+      <li><a href="https://github.com/daniel-melo-me/strata-map" target="_blank" rel="noopener">Código aberto no GitHub</a>: o conteúdo vem com fontes, e sugestões são bem-vindas.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

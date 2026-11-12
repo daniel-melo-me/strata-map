@@ -9,6 +9,19 @@ const STYLE_IDS=[...STYLE_ORDER.filter(id=>styles[id]),...Object.keys(styles).fi
 const askedStyle=new URLSearchParams(location.search).get("estilo");
 const STYLE_ID=styles[askedStyle]?askedStyle:STYLE_IDS[0], STYLE=styles[STYLE_ID];
 const N=STYLE.nodes, E=STYLE.edges, JOURNEY=STYLE.journey;
+/* jornada contada pela Ana (curta, para iniciantes) ou com todos os passos técnicos */
+const TOUR=STYLE.tour&&STYLE.tour.length?STYLE.tour:JOURNEY;
+/* explicação em níveis (data/niveis.js): [em uma frase, analogia], com sobreposição por estilo */
+const LV=STRATA.levels||{base:{}};
+const levelOf=id=>(LV[STYLE_ID]&&LV[STYLE_ID][id])||LV.base[id]||null;
+/* modo apresentação (?apresentar): para projetar em sala; os links internos mantêm o modo */
+const params=new URLSearchParams(location.search), PRESENT=params.has("apresentar");
+const styleHref=id=>`?estilo=${id}${PRESENT?"&apresentar":""}`;
+if(PRESENT){
+  document.body.classList.add("present");
+  const out=document.createElement("a"); out.className="present-exit"; out.href=`?estilo=${STYLE_ID}`; out.textContent="Sair do modo apresentação";
+  document.body.appendChild(out);
+}
 /* zoom dentro do zoom (data/zoom.js): uma peça tem zoom se algum item do "por dentro" tem */
 const Z=STRATA.zoom||{};
 const zoomOf=(id,name)=>Z[id]&&Z[id][name]||null;
@@ -45,7 +58,9 @@ styleSel.onchange=()=>{
   const u=new URL(location.href); u.searchParams.set("estilo",styleSel.value); u.hash=""; location.href=u.href;
 };
 const totalMs=JOURNEY.reduce((a,x)=>a+x[3],0);
-document.getElementById("playHint").textContent=`A jornada: ${JOURNEY.length} passos, do toque à resposta, em ~${totalMs} ms.`;
+document.getElementById("playHint").textContent=TOUR!==JOURNEY
+  ?`A história da Ana: ${TOUR.length} passos, do toque à resposta, em ~${totalMs} ms. Quem quiser vê todos os ${JOURNEY.length}.`
+  :`A jornada: ${JOURNEY.length} passos, do toque à resposta, em ~${totalMs} ms.`;
 const pad=n=>String(n).padStart(2,"0");
 
 /* testemunho: as camadas em miniatura, como uma amostra de solo */
@@ -113,6 +128,16 @@ function markSeen(){
   try{ localStorage.setItem(SEEN_KEY,"1"); }catch(_){}
 }
 const mobile=window.matchMedia("(max-width: 680px)");
+/* progresso: quais peças deste estilo a pessoa já abriu (só no navegador dela) */
+const EXP_KEY="strata-explored-"+STYLE_ID;
+let explored=new Set();
+try{ explored=new Set((JSON.parse(localStorage.getItem(EXP_KEY)||"[]")||[]).filter(id=>N[id])); }catch(_){}
+explored.forEach(id=>el[id].classList.add("seen"));
+function markExplored(id){
+  if(explored.has(id)) return;
+  explored.add(id); el[id].classList.add("seen");
+  try{ localStorage.setItem(EXP_KEY,JSON.stringify([...explored])); }catch(_){}
+}
 
 /* wires */
 E.forEach(e=>{
@@ -206,10 +231,13 @@ const LEGEND={
 };
 function intro(){
   const types=new Set(E.map(e=>e[2]));
-  const seg=STYLE_IDS.map(id=>`<a href="?estilo=${id}"${id===STYLE_ID?' aria-current="true"':""}>${styles[id].name}</a>`).join("");
+  const seg=STYLE_IDS.map(id=>`<a href="${styleHref(id)}"${id===STYLE_ID?' aria-current="true"':""}>${styles[id].name}</a>`).join("");
+  const total=Object.keys(N).length, done=explored.size;
   panel.className="panel";
   panel.innerHTML=`<div class="intro">
    ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p><p class="style-seg-note">O mesmo sistema, montado de outro jeito em cada estilo. Troque e compare o que muda:</p><nav class="style-seg" aria-label="Estilo arquitetural">${seg}</nav></div>`:""}
+   <div class="progress"><div class="pg-bar" aria-hidden="true"><i style="width:${Math.round(done/total*100)}%"></i></div>
+    <p>${done?`Você explorou <b>${done} de ${total}</b> peças deste estilo.`:`São <b>${total} peças</b> neste estilo. As que você abrir ganham um ✓ no mapa.`}</p></div>
    <h3>Abra qualquer peça</h3>
    <p>Cada caixa tem um mundo dentro. Ao abrir, você vê do que ela é feita, quem cuida dela, com quem conversa e o que acontece se ela cair.</p>
    <p class="hint-expand"><span aria-hidden="true">${ICON_EXPAND}</span>Toque em qualquer caixa para abrir. Dentro do painel, ${ICON_LENS}<b>Entrar na peça</b> desce mais um nível.</p>
@@ -225,31 +253,98 @@ function setHash(id){
 function closePanel(){
   state.sel=null; refresh(); intro(); setHash(null);
 }
+/* ---------- glossário: o primeiro uso de cada termo num painel vira um botão com a definição ---------- */
+const GL=STRATA.glossary||{};
+/* siglas (duas ou mais maiúsculas) só casam escritas igual; palavras comuns casam sem diferenciar */
+const GL_CS=new Map(), GL_CI=new Map();
+Object.entries(GL).forEach(([gid,g])=>[g.t,...(g.alt||[])].forEach(f=>{
+  if((f.match(/[A-Z]/g)||[]).length>=2) GL_CS.set(f,gid); else GL_CI.set(f.toLowerCase(),gid);
+}));
+const reOf=(forms,flags)=>forms.length?new RegExp(`(^|[^\\p{L}\\p{N}])(${forms.sort((a,b)=>b.length-a.length).map(f=>f.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")})(?=$|[^\\p{L}\\p{N}])`,flags):null;
+const RE_CS=reOf([...GL_CS.keys()],"gu"), RE_CI=reOf([...GL_CI.keys()],"giu");
+/* termos que não ganham link no painel de uma peça: os que apontam para ela mesma */
+const glossSkip=id=>new Set(Object.entries(GL).filter(([,g])=>g.node===id||(N[id]&&g.t.toLowerCase()===N[id].n.toLowerCase())).map(([gid])=>gid));
+function glossLinker(skip){
+  const used=new Set(skip||[]), parts=[];
+  const sub=(m,pre,form)=>{
+    const gid=GL_CS.get(form)||GL_CI.get(form.toLowerCase());
+    if(!gid||used.has(gid)) return m;
+    used.add(gid); parts.push(`<button type="button" class="term" data-g="${gid}">${form}</button>`);
+    return pre+"\u0003"+(parts.length-1)+"\u0004";
+  };
+  return text=>{
+    if(!text) return "";
+    let h=esc(text);
+    if(RE_CS) h=h.replace(RE_CS,sub);
+    if(RE_CI) h=h.replace(RE_CI,sub);
+    return h.replace(/\u0003(\d+)\u0004/g,(_,i)=>parts[+i]);
+  };
+}
+/* o balão de definição: fica dentro do zoom quando o termo está lá (o zoom é um dialog modal) */
+const gpop=document.createElement("div"); gpop.className="gpop"; gpop.setAttribute("role","dialog"); gpop.hidden=true;
+let gpopFrom=null;
+function openTerm(btn){
+  const gid=btn.dataset.g, g=GL[gid]; if(!g) return;
+  (btn.closest("dialog")||document.body).appendChild(gpop);
+  const canOpen=g.node&&N[g.node]&&g.node!==state.sel;
+  gpop.setAttribute("aria-label",g.t);
+  gpop.innerHTML=`<b>${esc(g.t)}</b><p>${esc(g.d)}</p><div class="gpop-act">${canOpen?`<button type="button" data-gnode="${g.node}">Abrir ${esc(N[g.node].n)} →</button>`:""}<a href="glossario.html#${gid}">Ver no glossário</a></div>`;
+  gpop.hidden=false; gpopFrom=btn;
+  const r=btn.getBoundingClientRect(), w=Math.min(320,innerWidth-24);
+  gpop.style.width=w+"px";
+  gpop.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+"px";
+  const below=r.bottom+8, h=gpop.offsetHeight;
+  gpop.style.top=(below+h>innerHeight-12&&r.top-h-8>12?r.top-h-8:below)+"px";
+  const go=gpop.querySelector("[data-gnode]");
+  if(go) go.onclick=()=>{ const id=go.dataset.gnode; closeTerm(); if(zv.open) closeZoom(true); if(fail.on) exitFail(); goTo(id); };
+  gpop.querySelector("a,button").focus({preventScroll:true});
+}
+function closeTerm(){ if(gpop.hidden) return; gpop.hidden=true; if(gpopFrom&&gpopFrom.isConnected) gpopFrom.focus({preventScroll:true}); gpopFrom=null; }
+document.addEventListener("click",e=>{
+  const t=e.target.closest(".term");
+  if(t){ e.preventDefault(); gpop.hidden||gpopFrom!==t?openTerm(t):closeTerm(); return; }
+  if(!gpop.hidden&&!gpop.contains(e.target)) closeTerm();
+});
+window.addEventListener("scroll",()=>{ if(!gpop.hidden&&!gpop.closest("dialog")) closeTerm(); },{passive:true});
+/* o balão é fixo na tela: se o conteúdo rola, ele fecharia longe do termo */
+panel.addEventListener("scroll",()=>{ if(!gpop.hidden) closeTerm(); },{passive:true});
+document.getElementById("zvBody").addEventListener("scroll",()=>{ if(!gpop.hidden) closeTerm(); },{passive:true,capture:true});
+
 /* fontes de um fato: refs = [[rótulo, url], ...], na peça ou num nível do zoom */
 const ICON_EXT=`<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const refLinks=refs=>(refs||[]).map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)}${ICON_EXT}<span class="sr-only"> (abre em nova aba)</span></a>`).join("");
+/* "Para ir além" lembra a escolha: quem abriu uma vez continua vendo aberto */
+const DEEP_KEY="strata-deep";
+const deepOpen=()=>{ try{ return localStorage.getItem(DEEP_KEY)==="1"; }catch(_){ return false; } };
 function select(id){
-  clearFocus(); markSeen(); state.sel=id; refresh(); setHash(id);
-  const v=N[id], L=LAYERS[layerIdx[v.l]];
+  clearFocus(); markSeen(); markExplored(id); closeTerm(); state.sel=id; refresh(); setHash(id);
+  const v=N[id], L=LAYERS[layerIdx[v.l]], lv=levelOf(id), G=glossLinker(glossSkip(id));
   panel.className="panel open l"+(layerIdx[v.l]+1);
   const nb=edgesOf(id).map(e=>{const o=e[0]===id?e[1]:e[0];return `<button data-go="${o}">${N[o].n}<small>${e[3]}</small></button>`;}).join("");
-  const axn=Object.entries(v.ax||{}).map(([k,t])=>`<div class="axnote ${k}"><b>${AX[k][0]}:</b> ${t}</div>`).join("");
+  const axn=Object.entries(v.ax||{}).map(([k,t])=>`<div class="axnote ${k}"><b>${AX[k][0]}:</b> ${G(t)}</div>`).join("");
+  /* nível 1: em uma frase e como funciona; nível 2, recolhido: o conteúdo técnico */
   panel.innerHTML=`<button class="close" aria-label="Fechar">×</button>
    <span class="layer-tag">Camada ${layerIdx[v.l]+1}: ${L.n}</span>
-   <h3>${v.n}</h3><p class="what">${v.what}</p>
-   <h4 class="h-zoom">Por dentro${hasZoom(id)?`<button class="btn-zoom" data-zoom>${ICON_LENS}Entrar na peça</button>`:""}</h4>
-   <ul class="zoom">${v.inside.map((s,i)=>zoomOf(id,s[0])
-     ?`<li><button class="zoom-item" data-zi="${i}"><b>${s[0]}</b><span>${s[1]}</span><i aria-hidden="true">→</i></button></li>`
-     :`<li><b>${s[0]}</b><span>${s[1]}</span></li>`).join("")}</ul>
-   ${v.tech?`<h4>Tecnologias reais</h4><div class="tags">${v.tech.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:""}
-   ${v.host?`<h4>Onde pode rodar</h4><p>${v.host}</p>`:""}
+   <h3>${v.n}</h3>
+   ${lv?`<p class="lv-um">${G(lv[0])}</p><div class="lv-ana"><span>Como funciona</span><p>${esc(lv[1])}</p></div>`:`<p class="what">${G(v.what)}</p>`}
    <h4>Quem cuida</h4><div class="row who">${(v.who||[]).map(p=>`<button class="chip" data-persona="${p}" aria-pressed="${state.persona===p}">${PERSONAS[p][0]}</button>`).join("")}</div>
-   <h4>Se cair</h4><div class="fail">${v.fail}</div>
+   <h4>Se cair</h4><div class="fail">${G(v.fail)}</div>
    ${STYLE.failure?`<button class="btn-break" data-break>${ICON_BOLT}Derrubar esta peça e ver a cascata</button>`:""}
-   ${axn?`<h4>Eixos que passam por aqui</h4>${axn}`:""}
-   ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}
-   ${v.refs?`<h4>Fontes</h4><div class="refs">${refLinks(v.refs)}</div>`:""}`;
+   <details class="deeper"${deepOpen()?" open":""}>
+    <summary><b>Para ir além</b><span>Por dentro, tecnologias reais, onde roda e fontes</span></summary>
+    ${lv?`<p class="what">${G(v.what)}</p>`:""}
+    <h4 class="h-zoom">Por dentro${hasZoom(id)?`<button class="btn-zoom" data-zoom>${ICON_LENS}Entrar na peça</button>`:""}</h4>
+    <ul class="zoom">${v.inside.map((s,i)=>zoomOf(id,s[0])
+      ?`<li><button class="zoom-item" data-zi="${i}"><b>${s[0]}</b><span>${s[1]}</span><i aria-hidden="true">→</i></button></li>`
+      :`<li><b>${s[0]}</b><span>${G(s[1])}</span></li>`).join("")}</ul>
+    ${v.tech?`<h4>Tecnologias reais</h4><div class="tags">${v.tech.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:""}
+    ${v.host?`<h4>Onde pode rodar</h4><p>${G(v.host)}</p>`:""}
+    ${axn?`<h4>Eixos que passam por aqui</h4>${axn}`:""}
+    ${v.refs?`<h4>Fontes</h4><div class="refs">${refLinks(v.refs)}</div>`:""}
+   </details>
+   ${nb?`<h4>Conversa com</h4><div class="near">${nb}</div>`:""}`;
   panel.querySelector(".close").onclick=closePanel;
+  panel.querySelector("details.deeper").addEventListener("toggle",e=>{ try{ localStorage.setItem(DEEP_KEY,e.target.open?"1":"0"); }catch(_){} });
   const zb=panel.querySelector("[data-zoom]"); if(zb) zb.onclick=()=>openZoom([id]);
   panel.querySelectorAll("[data-zi]").forEach(b=>b.onclick=()=>openZoom([id,+b.dataset.zi]));
   const brk=panel.querySelector("[data-break]"); if(brk) brk.onclick=()=>breakNode(id);
@@ -333,7 +428,18 @@ setInterval(ambient,700);
 
 /* ---------- journey ---------- */
 const narr=document.getElementById("narr"), nText=document.getElementById("nText"), nStep=document.getElementById("nStep"), nMs=document.getElementById("nMs"), nBar=document.getElementById("nBar"), nPause=document.getElementById("nPause");
-const LAST=JOURNEY.length-1;
+const nQuiz=document.getElementById("nQuiz"), nEnd=document.getElementById("nEnd"), nMode=document.getElementById("nMode");
+/* história da Ana (padrão) ou todos os passos técnicos; a escolha fica guardada */
+const TOUR_KEY="strata-tour";
+let fullMode=false; try{ fullMode=localStorage.getItem(TOUR_KEY)==="full"; }catch(_){}
+let J=TOUR, LAST=TOUR.length-1;
+function setMode(full){
+  fullMode=full&&TOUR!==JOURNEY? true : false;
+  J=fullMode?JOURNEY:TOUR; LAST=J.length-1;
+  nMode.hidden=TOUR===JOURNEY;
+  nMode.textContent=fullMode?"Ver a história da Ana":`Ver todos os ${JOURNEY.length} passos`;
+  try{ localStorage.setItem(TOUR_KEY,fullMode?"full":"ana"); }catch(_){}
+}
 const jr={on:false,i:0,paused:false,done:false,timer:null,delay:null};
 function clearActive(){
   Object.values(el).forEach(b=>b.classList.remove("is-active"));
@@ -353,18 +459,59 @@ function revealStep(a,b){
 const readMs=text=>Math.min(8000,Math.max(1400,text.length*40));
 function clearTimers(){clearTimeout(jr.timer);clearTimeout(jr.delay);}
 function setPaused(p){jr.paused=p; jr.done=false; nPause.textContent=p?"Continuar":"Pausar";}
-function finish(){jr.paused=true; jr.done=true; nPause.textContent="Repetir";}
+/* fim: um resumo do que a mensagem atravessou e um convite para o próximo passo */
+function finish(){
+  jr.paused=true; jr.done=true; nPause.textContent="Repetir";
+  const ids=new Set(JOURNEY.flatMap(x=>[x[0],x[1]])), lay=new Set([...ids].map(id=>N[id].l));
+  const ms=JOURNEY.reduce((a,x)=>a+x[3],0);
+  const below=LAYERS.filter(L=>!lay.has(L.id)).map(L=>L.n.toLowerCase());
+  nText.innerHTML=`${TOUR!==JOURNEY&&!fullMode?"A mensagem da Ana":"A mensagem"} passou por <b>${ids.size} peças</b> em <b>${lay.size} das ${LAYERS.length} camadas</b>, em cerca de <b>${ms} ms</b>.`
+    +(below.length?` As outras camadas (${below.join(", ")}) estão por baixo de tudo: ligue “Onde cada coisa roda” para ver o que sustenta cada peça.`:"");
+  const next=STYLE_IDS[STYLE_IDS.indexOf(STYLE_ID)+1];
+  nEnd.innerHTML=(TOUR!==JOURNEY?`<button type="button" data-mode>${fullMode?"Ver a história da Ana":`Ver todos os ${JOURNEY.length} passos`}</button>`:"")
+    +(next?`<a href="${styleHref(next)}">Agora veja o mesmo clique em ${styles[next].name} →</a>`:"");
+  nEnd.hidden=false;
+  const m=nEnd.querySelector("[data-mode]"); if(m) m.onclick=()=>{ setMode(!fullMode); setPaused(false); showStep(0); };
+}
+/* pergunta do passo: aparece quando o pacote chega; a jornada espera a resposta */
+function showQuiz(q){
+  setPaused(true);
+  nQuiz.innerHTML=`<p class="q-p">${esc(q.p)}</p><div class="q-o">${q.o.map((o,k)=>`<button type="button" data-k="${k}">${esc(o)}</button>`).join("")}</div><p class="q-why" hidden></p>`;
+  nQuiz.hidden=false;
+  nQuiz.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k, ok=k===q.c;
+    nQuiz.querySelectorAll("[data-k]").forEach(x=>{ x.disabled=true; if(+x.dataset.k===q.c) x.classList.add("right"); });
+    if(!ok) b.classList.add("wrong");
+    const why=nQuiz.querySelector(".q-why"); why.hidden=false;
+    why.innerHTML=`<b>${ok?"Isso!":"Quase."}</b> ${esc(q.why)}`;
+    nPause.focus({preventScroll:true});
+  });
+}
+/* o pacote segue as peças do meio (via), uma linha por vez */
+async function sendPath(path,dur,token){
+  const hops=path.length-1, each=reduce?10:Math.max(260,dur/hops);
+  for(let k=0;k<hops;k++){
+    if(token!==jr.token) return false;
+    const e=findEdge(path[k],path[k+1]);
+    await send(path[k],path[k+1],e?COLORS[e[2]]:"var(--w-net)",each,9,"jpkt");
+  }
+  return token===jr.token;
+}
 function showStep(i){
-  clearTimers(); jr.i=i; const s=JOURNEY[i];
-  const ms=JOURNEY.slice(0,i+1).reduce((a,x)=>a+x[3],0);
-  nStep.textContent=`Passo ${i+1} de ${JOURNEY.length}`; nMs.textContent=`${ms} ms desde o toque`;
-  nText.textContent=s[2]; nBar.style.width=((i+1)/JOURNEY.length*100)+"%";
+  clearTimers(); jr.i=i; jr.done=false; const s=J[i], extra=s[4]||{};
+  const ms=J.slice(0,i+1).reduce((a,x)=>a+x[3],0);
+  nStep.textContent=`Passo ${i+1} de ${J.length}`; nMs.textContent=`${ms} ms desde o toque`;
+  nText.textContent=s[2]; nBar.style.width=((i+1)/J.length*100)+"%";
+  nQuiz.hidden=true; nQuiz.innerHTML=""; nEnd.hidden=true;
   clearActive(); el[s[0]].classList.add("is-active"); el[s[1]].classList.add("is-active");
   revealStep(s[0],s[1]);
-  const e=findEdge(s[0],s[1]); const color=e?COLORS[e[2]]:"var(--w-net)";
-  if(e) e.path.classList.add("j-hot");
-  jr.delay=setTimeout(()=>{ send(s[0],s[1],color,reduce?10:1000,9,"jpkt").then(()=>{
-    if(!jr.on||jr.paused||jr.i!==i) return;
+  const path=[s[0],...(extra.via||[]),s[1]];
+  for(let k=0;k<path.length-1;k++){ const e=findEdge(path[k],path[k+1]); if(e) e.path.classList.add("j-hot"); }
+  const token=jr.token=(jr.token||0)+1;
+  jr.delay=setTimeout(()=>{ sendPath(path,1000,token).then(alive=>{
+    if(!alive||!jr.on||jr.i!==i) return;
+    if(extra.p){ showQuiz(extra); return; }
+    if(jr.paused) return;
     if(i<LAST) jr.timer=setTimeout(()=>showStep(i+1),readMs(s[2]));
     else finish();
   });},reduce?0:250);
@@ -372,9 +519,12 @@ function showStep(i){
 function startJourney(){
   if(fail.on) exitFail();
   if(state.sel) closePanel();
-  clearFocus(); jr.on=true; setPaused(false); narr.classList.add("on"); showStep(0);
+  clearFocus(); setMode(fullMode); jr.on=true; setPaused(false); narr.classList.add("on");
+  /* respiro no fim do mapa: as peças das últimas camadas também precisam subir acima da caixa */
+  document.body.classList.add("jr-on"); showStep(0);
 }
-function stopJourney(){jr.on=false;clearTimers();narr.classList.remove("on");clearActive();}
+nMode.onclick=()=>{ setMode(!fullMode); setPaused(false); showStep(0); };
+function stopJourney(){jr.on=false;jr.token=(jr.token||0)+1;clearTimers();narr.classList.remove("on");document.body.classList.remove("jr-on");clearActive();}
 function jump(i){setPaused(true); showStep(i);}
 document.querySelectorAll("[data-play]").forEach(b=>b.onclick=startJourney);
 document.getElementById("nStop").onclick=stopJourney;
@@ -383,7 +533,7 @@ document.getElementById("nPrev").onclick=()=>{if(jr.i>0) jump(jr.i-1);};
 /* a barra de progresso pula para o ponto clicado */
 document.getElementById("nBarWrap").onclick=e=>{
   const r=e.currentTarget.getBoundingClientRect();
-  jump(Math.min(LAST,Math.max(0,Math.floor((e.clientX-r.left)/r.width*JOURNEY.length))));
+  jump(Math.min(LAST,Math.max(0,Math.floor((e.clientX-r.left)/r.width*J.length))));
 };
 /* no celular, arrastar a caixa para os lados avança ou volta */
 let swipeX=null;
@@ -394,12 +544,14 @@ narr.addEventListener("touchend",e=>{
 },{passive:true});
 nPause.onclick=()=>{
   if(jr.done){setPaused(false); showStep(0); return;}
+  /* com a pergunta na tela, Continuar segue para o próximo passo */
   if(jr.paused){
     setPaused(false);
     if(jr.i<LAST) showStep(jr.i+1); else finish();
   }else{setPaused(true); clearTimers();}
 };
 document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&!gpop.hidden){ e.preventDefault(); closeTerm(); return; }
   if(search.open||zv.open) return;
   if(e.key==="Escape"){
     if(moreViews.classList.contains("open")) setMore(false);
@@ -506,7 +658,11 @@ const F_USER={
   ok:"O usuário nem percebe."
 };
 const F_SAMPLES=(STYLE.failure&&STYLE.failure.samples)||["oltp","kafka","notificacoes","k8s","dns","datacenter"];
-const fail={on:false,root:null,red:true,timers:[]};
+const fail={on:false,root:null,red:true,timers:[],guess:true};
+/* desafio: antes de ver a cascata, a pessoa aposta no que o usuário vai perceber (guardado no navegador) */
+const GUESS_KEY="strata-guess";
+try{ fail.guess=localStorage.getItem(GUESS_KEY)!=="0"; }catch(_){}
+const F_GUESS=[["ok","Nada: tudo continua normal"],["degr","Algo fica lento, falha ou chega atrasado"],["stop","O sistema sai do ar para ela"]];
 const failBtn=document.getElementById("failBtn");
 if(!STYLE.failure) failBtn.hidden=true;
 failBtn.onclick=()=>fail.on?exitFail():enterFail();
@@ -538,7 +694,7 @@ function redSwitch(){
 }
 function bindRed(){
   const sw=panel.querySelector(".f-red");
-  if(sw) sw.onclick=()=>{fail.red=!fail.red; fail.root?breakNode(fail.root):failIntro();};
+  if(sw) sw.onclick=()=>{fail.red=!fail.red; fail.root?breakNode(fail.root,{reveal:true}):failIntro();};
 }
 function failIntro(){
   panel.className="panel open";
@@ -548,16 +704,42 @@ function failIntro(){
    <p class="what">Escolha uma peça para derrubar. A queda se espalha por quem depende dela: alguns param, outros só degradam, e as filas seguram o tranco.</p>
    ${redSwitch()}
    <p class="f-note">Ligada, mostra a produção real: réplicas, failover e várias zonas. Desligada, mostra por que elas existem.</p>
+   <button class="switch f-guess-sw" aria-pressed="${fail.guess}"><i aria-hidden="true"></i>Tentar adivinhar antes</button>
+   <p class="f-note">Antes da cascata, você aposta no que a pessoa usando o app vai perceber.</p>
    <h4>Comece por aqui</h4>
    <div class="near">${F_SAMPLES.filter(k=>N[k]).map(k=>`<button data-break="${k}">${N[k].n}<small>${LAYERS[layerIdx[N[k].l]].n}</small></button>`).join("")}</div>`;
   panel.querySelector(".close").onclick=exitFail;
   panel.querySelectorAll("[data-break]").forEach(b=>b.onclick=()=>breakNode(b.dataset.break));
+  const gs=panel.querySelector(".f-guess-sw");
+  gs.onclick=()=>{ fail.guess=!fail.guess; gs.setAttribute("aria-pressed",String(fail.guess)); try{ localStorage.setItem(GUESS_KEY,fail.guess?"1":"0"); }catch(_){} };
   bindRed(); panel.scrollTop=0;
 }
-function breakNode(id){
+/* a pergunta do desafio: só a peça derrubada aparece no mapa até a resposta */
+function failGuess(id){
+  const v=N[id];
+  map.classList.add("f-active");
+  el[id].classList.add("f-in","f-down"); el[id].querySelector(".f-badge").textContent=F_LABEL.down;
+  panel.className="panel open l"+(layerIdx[v.l]+1);
+  panel.innerHTML=`<button class="close" aria-label="Sair do modo falha">×</button>
+   <span class="layer-tag f-tag">Modo falha · Desafio</span>
+   <h3>${v.n} caiu</h3>
+   <p class="what">Antes de ver a cascata: o que você acha que a pessoa usando o app vai perceber?</p>
+   <div class="f-guess">${F_GUESS.map(([k,t])=>`<button type="button" data-guess="${k}">${t}</button>`).join("")}</div>
+   <p class="f-note">${fail.red?"Considerando a produção real, com réplicas, failover e várias zonas.":"Considerando um sistema sem redundância nenhuma."}</p>
+   <button class="f-skip" type="button" data-skip>Pular e ver a cascata</button>`;
+  panel.querySelector(".close").onclick=exitFail;
+  panel.querySelectorAll("[data-guess]").forEach(b=>b.onclick=()=>breakNode(id,{reveal:true,guess:b.dataset.guess}));
+  panel.querySelector("[data-skip]").onclick=()=>breakNode(id,{reveal:true});
+  panel.scrollTop=0;
+  el[id].scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});
+  announce.textContent=`${v.n} caiu. O que você acha que o usuário vai perceber?`;
+}
+function breakNode(id,opt){
+  opt=opt||{};
   markSeen();
   if(!fail.on) enterFail();
   clearFailMarks(); fail.root=id; setHash("falha-"+id);
+  if(fail.guess&&!opt.reveal){ failGuess(id); return; }
   const r=STRATA.simulateFailure(STYLE,id,fail.red);
   map.classList.add("f-active");
   Object.entries(r.nodes).sort((a,b)=>a[1].wave-b[1].wave).forEach(([nid,info])=>{
@@ -569,12 +751,12 @@ function breakNode(id){
     };
     if(reduce||!info.wave) apply(); else fail.timers.push(setTimeout(apply,info.wave*550));
   });
-  failReport(id,r);
+  failReport(id,r,opt.guess);
   el[id].scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});
   const n=Object.keys(r.nodes).length-1;
   announce.textContent=`${N[id].n} caiu. ${n?n+" peças afetadas.":"Nenhuma outra peça afetada."} ${F_USER[r.user]}`;
 }
-function failReport(id,r){
+function failReport(id,r,guess){
   const v=N[id], g=STYLE.failure.guards[id];
   const groups=F_GROUPS.map(([s,title])=>{
     const items=Object.entries(r.nodes).filter(([k,x])=>k!==id&&x.s===s).sort((a,b)=>a[1].wave-b[1].wave);
@@ -586,12 +768,13 @@ function failReport(id,r){
   /* a mesma queda nos outros estilos que têm essa peça */
   const compare=Object.entries(styles).filter(([sid,s])=>sid!==STYLE_ID&&s.failure&&s.nodes[id]).map(([sid,s])=>{
     const u=STRATA.simulateFailure(s,id,fail.red).user;
-    return `<a class="f-compare f-u-${u}" href="?estilo=${sid}#falha-${id}"><span>E em ${s.name}?</span>${F_USER[u]} <b>Ver →</b></a>`;
+    return `<a class="f-compare f-u-${u}" href="${styleHref(sid)}#falha-${id}"><span>E em ${s.name}?</span>${F_USER[u]} <b>Ver →</b></a>`;
   }).join("");
   panel.className="panel open l"+(layerIdx[v.l]+1);
   panel.innerHTML=`<button class="close" aria-label="Sair do modo falha">×</button>
    <span class="layer-tag f-tag">Modo falha · Camada ${layerIdx[v.l]+1}</span>
    <h3>${v.n} caiu</h3>
+   ${guess?`<div class="f-result ${guess===r.user?"right":"wrong"}"><b>${guess===r.user?"Você acertou.":"Não foi dessa vez."}</b> Sua aposta: ${F_GUESS.find(g=>g[0]===guess)[1].toLowerCase()}.</div>`:""}
    <div class="f-verdict f-u-${r.user}">${F_USER[r.user]}</div>
    ${compare}
    ${g?redSwitch()+(fail.red?`<div class="f-guard"><b>Quem segura:</b> ${g[1]}</div>`:`<p class="f-note">Sem redundância, nada segura a queda. Ligue a chave para ver como a produção se protege.</p>`)
@@ -634,16 +817,16 @@ function validPath(p){
   try{ if(!N[p[0]]) return false; const L=zLevel(p); return !!(L&&L.what); }catch(_){ return false; }
 }
 function zStage(path, hl){
-  const L=zLevel(path), v=N[path[0]], li=layerIdx[v.l]+1;
+  const L=zLevel(path), v=N[path[0]], li=layerIdx[v.l]+1, G=glossLinker(glossSkip(path[0]));
   const st=document.createElement("div"); st.className="zv-stage";
   st.innerHTML=`<div class="zv-in">
     <p class="zv-depth">Camada ${li} · ${LAYERS[li-1].n}<span class="zv-dots" aria-label="Nível ${path.length} de 3">${[1,2,3].map(n=>`<i class="${n<=path.length?"on":""}"></i>`).join("")}</span></p>
     <h2 tabindex="-1">${L.title}</h2>
-    <p class="zv-what">${L.what}</p>
+    <p class="zv-what">${G(L.what)}</p>
     ${L.ex?`<figure class="zv-ex"><figcaption>${esc(L.ex[0])}</figcaption><pre><code>${esc(L.ex[1])}</code></pre></figure>`:""}
     <div class="zv-grid">${L.cards.map((c,i)=>c.kids
       ?`<button class="zv-card can${c.n===hl?" zv-hit":""}" data-i="${i}"><b>${c.n}</b><span>${c.t}</span><em>${ICON_LENS}${c.kids} partes por dentro</em></button>`
-      :`<div class="zv-card${c.n===hl?" zv-hit":""}"><b>${c.n}</b><span>${c.t}</span></div>`).join("")}</div>
+      :`<div class="zv-card${c.n===hl?" zv-hit":""}"><b>${c.n}</b><span>${G(c.t)}</span></div>`).join("")}</div>
     ${L.refs?`<div class="refs zv-refs"><span>Fontes</span>${refLinks(L.refs)}</div>`:""}
   </div>`;
   st.querySelectorAll(".zv-card.can").forEach(c=>c.onclick=()=>zoomTo([...path,+c.dataset.i],c));
@@ -744,7 +927,7 @@ document.getElementById("zvClose").onclick=()=>closeZoom();
 zvBack.onclick=()=>zoomUp(zpath.length-1);
 /* Esc sobe um nível. Depois de vários Esc seguidos o navegador deixa de aceitar o preventDefault
    e fecha o dialog sozinho; o evento "close" garante a mesma limpeza do nosso fechamento. */
-zv.addEventListener("cancel",e=>{ if(!e.cancelable) return; e.preventDefault(); zoomUp(zpath.length-1); });
+zv.addEventListener("cancel",e=>{ if(!e.cancelable) return; e.preventDefault(); if(!gpop.hidden){ closeTerm(); return; } zoomUp(zpath.length-1); });
 zv.addEventListener("close",()=>{
   if(zClose){ zClose(); return; }
   if(zv.open||!zpath.length) return;
@@ -766,5 +949,8 @@ function fromHash(){
 }
 window.addEventListener("hashchange",fromHash);
 
-intro(); refresh(); layout(); fromHash();
+intro(); refresh(); layout();
+/* ?papel=dba abre o mapa já pelos olhos de um papel (usado nos roteiros para professores) */
+if(PERSONAS[params.get("papel")]) setPersona(params.get("papel"));
+fromHash();
 })();

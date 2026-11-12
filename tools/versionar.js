@@ -1,7 +1,8 @@
-/* Versiona os arquivos locais citados no index.html: cada src/href em assets/ ganha ?v=<hash do conteúdo>.
+/* Versiona os arquivos locais citados nas páginas HTML da raiz (index, glossário, professores):
+ * cada src/href em assets/ ganha ?v=<hash do conteúdo>.
  * Assim o navegador nunca junta um HTML novo com JS ou CSS antigo depois de um deploy
  * (o GitHub Pages guarda tudo em cache por 10 minutos). Só os arquivos que mudaram trocam de versão.
- *   node tools/versionar.js           atualiza o index.html
+ *   node tools/versionar.js           atualiza as páginas
  *   node tools/versionar.js --check   só confere; sai com código 1 se alguma versão estiver velha */
 const fs = require("fs");
 const path = require("path");
@@ -24,16 +25,23 @@ function versionar(html) {
   return { html: out, changed };
 }
 
-module.exports = { versionar };
+/* as páginas publicadas: todo .html da raiz */
+const pages = () => fs.readdirSync(ROOT).filter(f => f.endsWith(".html")).sort();
+
+module.exports = { versionar, pages };
 
 if (require.main === module) {
-  const file = path.join(ROOT, "index.html");
-  const { html, changed } = versionar(fs.readFileSync(file, "utf8"));
-  if (process.argv.includes("--check")) {
-    if (changed.length) { console.log("Versões desatualizadas no index.html: " + changed.join(", ") + "\nRode: node tools/versionar.js"); process.exit(1); }
-    console.log("Versões em dia.");
-  } else {
-    fs.writeFileSync(file, html);
-    console.log(changed.length ? "Versionados: " + changed.join(", ") : "Nada mudou.");
+  const check = process.argv.includes("--check");
+  let stale = [];
+  for (const page of pages()) {
+    const file = path.join(ROOT, page);
+    const { html, changed } = versionar(fs.readFileSync(file, "utf8"));
+    if (!changed.length) continue;
+    stale.push(`${page}: ${changed.join(", ")}`);
+    if (!check) fs.writeFileSync(file, html);
   }
+  if (check) {
+    if (stale.length) { console.log("Versões desatualizadas:\n  " + stale.join("\n  ") + "\nRode: node tools/versionar.js"); process.exit(1); }
+    console.log("Versões em dia.");
+  } else console.log(stale.length ? "Versionados:\n  " + stale.join("\n  ") : "Nada mudou.");
 }

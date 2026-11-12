@@ -2,9 +2,12 @@
  * Os dados vêm de assets/js/data/ (window.STRATA). */
 (function(){
 const {layers:LAYERS, personas:PERSONAS, axes:AX, styles}=window.STRATA;
-/* estilo escolhido pela URL (?estilo=monolito); sem parâmetro, o primeiro registrado */
+/* estilos do mais simples ao mais distribuído; estilos novos entram no fim */
+const STYLE_ORDER=["monolito","microsservicos","serverless"];
+const STYLE_IDS=[...STYLE_ORDER.filter(id=>styles[id]),...Object.keys(styles).filter(id=>!STYLE_ORDER.includes(id))];
+/* estilo escolhido pela URL (?estilo=serverless); sem parâmetro, o mais simples: o monólito */
 const askedStyle=new URLSearchParams(location.search).get("estilo");
-const STYLE_ID=styles[askedStyle]?askedStyle:Object.keys(styles)[0], STYLE=styles[STYLE_ID];
+const STYLE_ID=styles[askedStyle]?askedStyle:STYLE_IDS[0], STYLE=styles[STYLE_ID];
 const N=STYLE.nodes, E=STYLE.edges, JOURNEY=STYLE.journey;
 /* zoom dentro do zoom (data/zoom.js): uma peça tem zoom se algum item do "por dentro" tem */
 const Z=STRATA.zoom||{};
@@ -37,7 +40,7 @@ themeBtns.forEach(b=>b.onclick=()=>applyTheme(b.dataset.themeOpt));
 applyTheme(document.documentElement.dataset.theme||"system");
 
 const styleSel=document.getElementById("styleSel");
-Object.entries(styles).forEach(([id,s])=>styleSel.add(new Option(s.name,id,false,id===STYLE_ID)));
+STYLE_IDS.forEach(id=>styleSel.add(new Option(styles[id].name,id,false,id===STYLE_ID)));
 styleSel.onchange=()=>{
   const u=new URL(location.href); u.searchParams.set("estilo",styleSel.value); u.hash=""; location.href=u.href;
 };
@@ -203,10 +206,7 @@ const LEGEND={
 };
 function intro(){
   const types=new Set(E.map(e=>e[2]));
-  /* do mais simples ao mais distribuído; estilos novos entram no fim */
-  const ORDER=["monolito","microsservicos","serverless"];
-  const ids=[...ORDER.filter(id=>styles[id]),...Object.keys(styles).filter(id=>!ORDER.includes(id))];
-  const seg=ids.map(id=>`<a href="?estilo=${id}"${id===STYLE_ID?' aria-current="true"':""}>${styles[id].name}</a>`).join("");
+  const seg=STYLE_IDS.map(id=>`<a href="?estilo=${id}"${id===STYLE_ID?' aria-current="true"':""}>${styles[id].name}</a>`).join("");
   panel.className="panel";
   panel.innerHTML=`<div class="intro">
    ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p><p class="style-seg-note">O mesmo sistema, montado de outro jeito em cada estilo. Troque e compare o que muda:</p><nav class="style-seg" aria-label="Estilo arquitetural">${seg}</nav></div>`:""}

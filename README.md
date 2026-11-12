@@ -52,17 +52,17 @@ Ao tocar em qualquer componente, você vê:
 
 ### 🏛️ Três estilos arquiteturais
 
-Escolha o estilo no topo da página e veja o mesmo sistema montado de outro jeito:
+Escolha o estilo e veja o mesmo sistema montado de outro jeito. A ordem é a de quando o sistema cresce:
 
-- **Microsserviços:** cada parte do negócio é um serviço independente, com deploy e banco próprios, conversando pela rede.
 - **Monólito:** um único programa com todos os módulos dentro. Os módulos se chamam em memória, sem rede, e dividem um banco só.
+- **Microsserviços:** cada parte do negócio é um serviço independente, com deploy e banco próprios, conversando pela rede.
 - **Serverless:** o código vira funções que só rodam quando chamadas. O provedor cuida de servidores e escala; a jornada mostra o preço disso, o cold start.
 
-As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e o que cai junto no modo falha. O estilo fica no link: `?estilo=monolito` ou `?estilo=serverless`.
+As camadas são as mesmas; mudam as peças, as conexões, a jornada do clique e o que cai junto no modo falha. O site abre no monólito, o modelo mais simples; os outros ficam no link: `?estilo=microsservicos` ou `?estilo=serverless`.
 
 ### ▶️ A jornada de um clique
 
-Acompanhe uma requisição real atravessando todas as camadas, em até 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo, chegando a cerca de **200 milissegundos** em microsserviços. No serverless, a mesma consulta com cold start passa de **400**.
+Acompanhe uma requisição real atravessando todas as camadas, em até 24 passos narrados: DNS, Wi-Fi, provedor, backbone, borda, gateway, identidade, cache, banco, eventos e a volta. Com contador de tempo: cerca de **170 milissegundos** no monólito e **180** em microsserviços. No serverless, a mesma consulta com cold start passa de **400**.
 
 ### ⚡ Modo falha
 
@@ -133,7 +133,7 @@ python3 -m http.server 8000
 # abra http://localhost:8000
 ```
 
-Cada peça tem link direto: `index.html#pedidos` abre o mapa já com o serviço de pedidos aberto.
+Cada peça tem link direto: `index.html#pedidos` abre o mapa já com a peça de pedidos aberta.
 
 Antes de publicar uma mudança, versione os arquivos e valide as referências (o GitHub também valida a cada push):
 

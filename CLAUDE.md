@@ -21,7 +21,7 @@ Origem: a dificuldade de "ver o todo" ao entrar na área de tecnologia. Cada con
 - **Dois eixos separados:** arquitetura (estrutural) é a espinha dorsal; processo ágil fica num eixo à parte. Não misturar.
 - **Zoom semântico:** ao aproximar, a informação muda de natureza (servidor → pods e serviços → container, processo e threads).
 - **Matriz, não escada:** eixo vertical = profundidade; horizontal = componentes que coexistem na camada; eixos transversais (segurança, observabilidade, resiliência) atravessam todas as camadas.
-- **Seletor de estilo arquitetural:** escolher microsserviços, event-driven, hexagonal, serverless ou monólito reconfigura o mapa. Hoje estão mapeados **microsserviços**, **monólito** e **serverless**, escolhidos por `?estilo=<id>` (o seletor recarrega a página).
+- **Seletor de estilo arquitetural:** escolher microsserviços, event-driven, hexagonal, serverless ou monólito reconfigura o mapa. Hoje estão mapeados **microsserviços**, **monólito** e **serverless**, escolhidos por `?estilo=<id>` (o seletor recarrega a página). Sem parâmetro, abre no **monólito**, o modelo mental mais simples para iniciantes; o seletor e o card de estilo seguem a progressão monólito → microsserviços → serverless (`STYLE_ORDER` em app.js).
 - **Personas:** mapear onde cada papel atua. É um diferencial central.
 - **Mapa vivo:** nós conectados por arestas rotuladas, com movimento.
 - **Formato:** mapa panorâmico (camadas paradas, usuário escolhe o que explorar), não jornada linear forçada. A jornada animada existe como recurso opcional.

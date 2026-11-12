@@ -16,15 +16,18 @@ STRATA.layers=[
 STRATA.personas={
  ux:["Produto e UX","Decide o que construir e como a pessoa vai usar. Vive na superfície, mas precisa saber o custo do que pede lá embaixo."],
  front:["Dev front-end","Constrói a interface que roda no navegador e consome as APIs."],
+ mobile:["Dev mobile","Constrói os apps de Android e iOS: telas, login, notificações push e a publicação nas lojas."],
  back:["Dev back-end","Escreve as regras de negócio, as APIs e a integração com dados e eventos."],
  qa:["QA","Garante que cada camada faz o que promete, do clique ao banco."],
  arq:["Arquiteto de solução","Desenha como as peças se encaixam e escolhe os trade-offs."],
- devops:["DevOps","Automatiza o caminho do código até produção: pipeline, containers, infraestrutura como código."],
+ devops:["DevOps","Automatiza o caminho do código até produção: pipeline, containers, infraestrutura como código. Em empresas maiores, vira engenharia de plataforma."],
  sre:["SRE","Mantém tudo de pé: disponibilidade, latência, alertas, capacidade e resposta a incidentes."],
  dba:["DBA","Cuida dos bancos: desempenho, backup, réplicas e integridade."],
- dados:["Dados","Arquiteto e engenheiro de dados: modelam, movem e disponibilizam a informação para análise."],
- si:["Segurança da informação","Atravessa todas as camadas: identidade, criptografia, rede, código e prédio."],
- infra:["Infra e redes","Cuida das máquinas, redes, links e data centers que sustentam tudo."]
+ dados:["Dados","Engenharia, arquitetura e análise de dados: modelam, movem e transformam a informação em relatórios, painéis e modelos."],
+ si:["Segurança da informação","Atravessa todas as camadas: identidade, criptografia, rede, código, dados pessoais (LGPD) e prédio."],
+ infra:["Infra e redes","Cuida das máquinas, redes, links e data centers que sustentam tudo."],
+ suporte:["Suporte técnico","Atende quem está com problema e investiga onde está a falha: no aparelho, na rede, no login ou no sistema. É a porta de entrada de muita gente na área."],
+ finops:["FinOps","Acompanha quanto a nuvem custa, peça por peça, e ajuda o time a gastar melhor sem perder desempenho."]
 };
 
 STRATA.axes={

@@ -100,10 +100,12 @@ Ligue o serviço ao container, ao pod, ao Kubernetes, à máquina virtual, ao se
 
 ### 👀 Ver pelos olhos de
 
-Filtre o mapa pelo papel de quem atua em cada camada:
+Filtre o mapa pelo papel de quem atua em cada camada. São 14 papéis, da porta de entrada da área até os especialistas:
 
+- Suporte técnico
 - Produto e UX
 - Dev front-end
+- Dev mobile
 - Dev back-end
 - QA
 - Arquiteto de solução
@@ -113,6 +115,9 @@ Filtre o mapa pelo papel de quem atua em cada camada:
 - Dados
 - Segurança da informação
 - Infra e redes
+- FinOps
+
+O link `?papel=suporte` (ou outro papel) já abre o mapa por esse ponto de vista.
 
 ---
 

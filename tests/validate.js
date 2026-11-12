@@ -76,6 +76,8 @@ for (const [sid, st] of Object.entries(styles)) {
     if (!Array.isArray(v.who) || !v.who.length) err(`${p}: sem "who"`);
     (v.who || []).forEach(w => { if (!personas[w]) err(`${p}: persona "${w}" não existe`); });
     Object.keys(v.ax || {}).forEach(k => { if (!axes[k]) err(`${p}: eixo "${k}" não existe`); });
+    /* quem cuida precisa bater com os eixos: peça marcada com segurança tem Segurança da informação */
+    if (v.ax && v.ax.seg && !(v.who || []).includes("si")) err(`${p}: tem o eixo de segurança, mas Segurança da informação não está em "who"`);
     if (v.tech && (!Array.isArray(v.tech) || !v.tech.every(isStr))) err(`${p}: "tech" inválido`);
     checkRefs(v.refs, p);
   }

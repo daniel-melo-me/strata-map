@@ -177,7 +177,8 @@ svg.packets{z-index:4}
 .layer-head .depth{font-family:var(--mono);font-weight:500;font-size:12.5px;letter-spacing:.06em;color:var(--hue);display:block;margin-bottom:8px}
 .layer-head h2{font-family:var(--display);font-weight:700;font-size:19px;margin:0;line-height:1.15;letter-spacing:-.01em}
 .layer-head p{margin:6px 0 0;font-size:13.5px;opacity:.72;line-height:1.4}
-.nodes{display:flex;flex-wrap:wrap;gap:16px 18px;padding:26px 24px;align-content:center}
+/* respiro acima dos cards: é onde sobem as curvas entre peças da mesma fileira */
+.nodes{display:flex;flex-wrap:wrap;gap:16px 18px;padding:40px 24px 26px;align-content:center}
 
 .node{position:relative;z-index:2;background:var(--card);border:1px solid color-mix(in srgb,var(--hue) 28%,var(--line));border-radius:12px;padding:11px 14px 12px;width:182px;text-align:left;cursor:pointer;color:var(--ink);box-shadow:var(--shadow);scroll-margin:calc(var(--bar-h) + 16px);transition:opacity .2s, transform .2s, box-shadow .2s, border-color .2s}
 .node b{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:15px;line-height:1.2}

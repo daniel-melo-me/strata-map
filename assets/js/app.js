@@ -162,7 +162,10 @@ function layout(){
   E.forEach(e=>{
     const a=box(e[0]), b=box(e[1]); let d, lx, ly;
     if(Math.abs(a.cy-b.cy)<a.h*0.6){
-      const x1=a.cx,y1=a.y,x2=b.cx,y2=b.y,lift=Math.min(70,26+Math.abs(x2-x1)*0.12);
+      /* a curva sobe no máximo até o topo da própria faixa: não encosta na barra nem invade a camada de cima.
+         Com os dois pontos de controle na mesma altura, o pico fica a 3/4 do "lift". */
+      const top=el[e[0]].closest(".layer").offsetTop, room=Math.max(12,(Math.min(a.y,b.y)-top-8)/0.75);
+      const x1=a.cx,y1=a.y,x2=b.cx,y2=b.y,lift=Math.min(70,room,26+Math.abs(x2-x1)*0.12);
       d=`M${x1},${y1} C${x1},${y1-lift} ${x2},${y2-lift} ${x2},${y2}`; lx=(x1+x2)/2; ly=Math.min(y1,y2)-lift*0.75;
     }else{
       const down=a.cy<b.cy, x1=a.cx, y1=down?a.y+a.h:a.y, x2=b.cx, y2=down?b.y:b.y+b.h, k=(y2-y1)*0.5;

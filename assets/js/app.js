@@ -99,6 +99,18 @@ LAYERS.forEach((L,i)=>{
   map.appendChild(sec);
 });
 
+/* primeira visita: o primeiro card pulsa e diz que abre, até a pessoa abrir alguma peça */
+const SEEN_KEY="strata-seen";
+let seen=false; try{ seen=localStorage.getItem(SEEN_KEY)==="1"; }catch(_){}
+const firstNode=el[Object.keys(el)[0]];
+if(!seen&&firstNode) firstNode.classList.add("hint-pulse");
+function markSeen(){
+  if(seen) return; seen=true;
+  if(firstNode) firstNode.classList.remove("hint-pulse");
+  try{ localStorage.setItem(SEEN_KEY,"1"); }catch(_){}
+}
+const mobile=window.matchMedia("(max-width: 680px)");
+
 /* wires */
 E.forEach(e=>{
   const p=document.createElementNS(SVGNS,"path");
@@ -130,6 +142,28 @@ function layout(){
     }
     e.path.setAttribute("d",d); e.label.setAttribute("x",lx); e.label.setAttribute("y",ly); e.label.setAttribute("text-anchor","middle");
   });
+  placeLabels();
+}
+/* rótulos das linhas: procura ao longo da curva um ponto livre de cards e de outros rótulos.
+   Sem ponto livre, o rótulo some (as conexões continuam listadas no painel). */
+const LABEL_AT=[.5,.4,.6,.3,.7,.2,.8,.12,.88];
+function placeLabels(){
+  const shown=E.filter(e=>e.label.classList.contains("show"));
+  if(!shown.length) return;
+  const pad=6, rects=Object.keys(el).map(id=>{const b=box(id); return {x:b.x-pad,y:b.y-pad,w:b.w+2*pad,h:b.h+2*pad};});
+  const hit=(r,q)=>r.x<q.x+q.w&&r.x+r.w>q.x&&r.y<q.y+q.h&&r.y+r.h>q.y;
+  const placed=[];
+  shown.forEach(e=>{
+    const t=e.label, L=e.path.getTotalLength(); t.classList.remove("off");
+    const ok=LABEL_AT.some(f=>{
+      const pt=e.path.getPointAtLength(L*f);
+      t.setAttribute("x",pt.x); t.setAttribute("y",pt.y+4);
+      const bb=t.getBBox(), r={x:bb.x-4,y:bb.y-3,w:bb.width+8,h:bb.height+6};
+      if(rects.some(q=>hit(r,q))||placed.some(q=>hit(r,q))) return false;
+      placed.push(r); return true;
+    });
+    if(!ok) t.classList.add("off");
+  });
 }
 new ResizeObserver(()=>layout()).observe(map);
 window.addEventListener("resize",layout);
@@ -156,6 +190,7 @@ function refresh(){
   });
   map.classList.remove("ax-on-seg","ax-on-obs","ax-on-res");
   if(state.ax) map.classList.add("ax-on-"+state.ax);
+  placeLabels(); moreState();
 }
 
 /* ---------- panel ---------- */
@@ -168,11 +203,13 @@ const LEGEND={
 };
 function intro(){
   const types=new Set(E.map(e=>e[2]));
-  const others=Object.entries(styles).filter(([id])=>id!==STYLE_ID)
-    .map(([id,s])=>`<a class="style-link" href="?estilo=${id}">Ver o mesmo sistema em ${s.name} →</a>`).join("");
+  /* do mais simples ao mais distribuído; estilos novos entram no fim */
+  const ORDER=["monolito","microsservicos","serverless"];
+  const ids=[...ORDER.filter(id=>styles[id]),...Object.keys(styles).filter(id=>!ORDER.includes(id))];
+  const seg=ids.map(id=>`<a href="?estilo=${id}"${id===STYLE_ID?' aria-current="true"':""}>${styles[id].name}</a>`).join("");
   panel.className="panel";
   panel.innerHTML=`<div class="intro">
-   ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p>${others}</div>`:""}
+   ${STYLE.desc?`<div class="style-note"><span class="layer-tag">Estilo: ${STYLE.name}</span><p>${STYLE.desc}</p><p class="style-seg-note">O mesmo sistema, montado de outro jeito em cada estilo. Troque e compare o que muda:</p><nav class="style-seg" aria-label="Estilo arquitetural">${seg}</nav></div>`:""}
    <h3>Abra qualquer peça</h3>
    <p>Cada caixa tem um mundo dentro. Ao abrir, você vê do que ela é feita, quem cuida dela, com quem conversa e o que acontece se ela cair.</p>
    <p class="hint-expand"><span aria-hidden="true">${ICON_EXPAND}</span>Toque em qualquer caixa para abrir. Dentro do painel, ${ICON_LENS}<b>Entrar na peça</b> desce mais um nível.</p>
@@ -192,7 +229,7 @@ function closePanel(){
 const ICON_EXT=`<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5h5v5M9.5 2.5 3 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const refLinks=refs=>(refs||[]).map(([t,u])=>`<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(t)}${ICON_EXT}<span class="sr-only"> (abre em nova aba)</span></a>`).join("");
 function select(id){
-  clearFocus(); state.sel=id; refresh(); setHash(id);
+  clearFocus(); markSeen(); state.sel=id; refresh(); setHash(id);
   const v=N[id], L=LAYERS[layerIdx[v.l]];
   panel.className="panel open l"+(layerIdx[v.l]+1);
   const nb=edgesOf(id).map(e=>{const o=e[0]===id?e[1]:e[0];return `<button data-go="${o}">${N[o].n}<small>${e[3]}</small></button>`;}).join("");
@@ -248,6 +285,15 @@ document.querySelectorAll("#axes .chip").forEach(b=>b.onclick=()=>{
   if(state.ax){banner.innerHTML=`<b>${AX[k][0]}.</b> ${AX[k][1]}`;banner.classList.add("on");} else banner.classList.remove("on");
   refresh();
 });
+/* "Mais visões": abaixo de 1400px os eixos e o "onde roda" ficam num menu; o ponto avisa que há visão ligada */
+const moreBtn=document.getElementById("moreBtn"), moreViews=document.getElementById("moreViews");
+function setMore(open){ moreViews.classList.toggle("open",open); moreBtn.setAttribute("aria-expanded",String(open)); }
+moreBtn.onclick=e=>{ e.stopPropagation(); setMore(!moreViews.classList.contains("open")); };
+document.addEventListener("click",e=>{ if(moreViews.classList.contains("open")&&!moreViews.contains(e.target)) setMore(false); });
+function moreState(){
+  moreBtn.classList.toggle("has-on",!!state.ax||state.runs);
+  moreBtn.style.setProperty("--more-c",state.ax?`var(--${state.ax})`:"var(--w-run)");
+}
 const runsBtn=document.getElementById("runs");
 runsBtn.onclick=()=>{
   state.runs=!state.runs; runsBtn.setAttribute("aria-pressed",String(state.runs));
@@ -256,9 +302,9 @@ runsBtn.onclick=()=>{
 
 /* ---------- packets ---------- */
 function findEdge(a,b){return E.find(e=>(e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a));}
-function send(a,b,color,dur,r){
+function send(a,b,color,dur,r,cls){
   return new Promise(res=>{
-    const c=document.createElementNS(SVGNS,"circle"); c.setAttribute("r",r||6); c.setAttribute("fill",color); c.setAttribute("stroke","var(--card)"); c.setAttribute("stroke-width","2");
+    const c=document.createElementNS(SVGNS,"circle"); c.setAttribute("r",r||6); if(cls) c.setAttribute("class",cls); c.setAttribute("fill",color); c.setAttribute("stroke","var(--card)"); c.setAttribute("stroke-width","2");
     packets.appendChild(c);
     const e=findEdge(a,b); const usePath=e&&!e.path.classList.contains("hidden");
     const A=box(a),B=box(b); const L=usePath?e.path.getTotalLength():0; const fwd=usePath&&e[0]===a;
@@ -277,7 +323,7 @@ function send(a,b,color,dur,r){
 /* ambient life */
 const COLORS={net:"var(--w-net)",sync:"var(--w-sync)",mem:"var(--w-mem)",async:"var(--w-async)",run:"var(--w-run)"};
 function ambient(){
-  if(reduce||jr.on||fail.on||document.hidden) return;
+  if(reduce||jr.on||fail.on||document.hidden||mobile.matches) return;
   const pool=E.filter(e=>e[2]!=="run"||state.runs);
   const e=pool[Math.floor(Math.random()*pool.length)];
   const rev=e[2]!=="async"&&Math.random()<.4;
@@ -289,7 +335,22 @@ setInterval(ambient,700);
 const narr=document.getElementById("narr"), nText=document.getElementById("nText"), nStep=document.getElementById("nStep"), nMs=document.getElementById("nMs"), nBar=document.getElementById("nBar"), nPause=document.getElementById("nPause");
 const LAST=JOURNEY.length-1;
 const jr={on:false,i:0,paused:false,done:false,timer:null,delay:null};
-function clearActive(){Object.values(el).forEach(b=>b.classList.remove("is-active"));}
+function clearActive(){
+  Object.values(el).forEach(b=>b.classList.remove("is-active"));
+  E.forEach(e=>e.path.classList.remove("j-hot"));
+  packets.querySelectorAll(".jpkt").forEach(c=>c.remove());
+}
+/* rola para que as peças do passo fiquem entre a barra e a caixa de narração; se não couberem juntas, mostra o destino */
+function revealStep(a,b){
+  const ra=el[a].getBoundingClientRect(), rb=el[b].getBoundingClientRect();
+  const barH=document.querySelector(".controls").offsetHeight;
+  const limit=narr.classList.contains("on")?narr.getBoundingClientRect().top:innerHeight;
+  const room=limit-barH-24, top=Math.min(ra.top,rb.top), bottom=Math.max(ra.bottom,rb.bottom);
+  const [t,h]=bottom-top<=room?[top,bottom-top]:[rb.top,rb.height];
+  window.scrollTo({top:Math.max(0,scrollY+t-barH-12-Math.max(0,(room-h)/2)),behavior:reduce?"auto":"smooth"});
+}
+/* tempo de leitura: passos curtos andam rápido, os longos dão tempo de ler */
+const readMs=text=>Math.min(8000,Math.max(1400,text.length*40));
 function clearTimers(){clearTimeout(jr.timer);clearTimeout(jr.delay);}
 function setPaused(p){jr.paused=p; jr.done=false; nPause.textContent=p?"Continuar":"Pausar";}
 function finish(){jr.paused=true; jr.done=true; nPause.textContent="Repetir";}
@@ -299,13 +360,14 @@ function showStep(i){
   nStep.textContent=`Passo ${i+1} de ${JOURNEY.length}`; nMs.textContent=`${ms} ms desde o toque`;
   nText.textContent=s[2]; nBar.style.width=((i+1)/JOURNEY.length*100)+"%";
   clearActive(); el[s[0]].classList.add("is-active"); el[s[1]].classList.add("is-active");
-  el[s[1]].scrollIntoView({block:"center",behavior:reduce?"auto":"smooth"});
+  revealStep(s[0],s[1]);
   const e=findEdge(s[0],s[1]); const color=e?COLORS[e[2]]:"var(--w-net)";
-  jr.delay=setTimeout(()=>{ send(s[0],s[1],color,reduce?10:1100,9).then(()=>{
+  if(e) e.path.classList.add("j-hot");
+  jr.delay=setTimeout(()=>{ send(s[0],s[1],color,reduce?10:1000,9,"jpkt").then(()=>{
     if(!jr.on||jr.paused||jr.i!==i) return;
-    if(i<LAST) jr.timer=setTimeout(()=>showStep(i+1),2000);
+    if(i<LAST) jr.timer=setTimeout(()=>showStep(i+1),readMs(s[2]));
     else finish();
-  });},reduce?0:450);
+  });},reduce?0:250);
 }
 function startJourney(){
   if(fail.on) exitFail();
@@ -318,6 +380,18 @@ document.querySelectorAll("[data-play]").forEach(b=>b.onclick=startJourney);
 document.getElementById("nStop").onclick=stopJourney;
 document.getElementById("nNext").onclick=()=>{if(jr.i<LAST) jump(jr.i+1);};
 document.getElementById("nPrev").onclick=()=>{if(jr.i>0) jump(jr.i-1);};
+/* a barra de progresso pula para o ponto clicado */
+document.getElementById("nBarWrap").onclick=e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  jump(Math.min(LAST,Math.max(0,Math.floor((e.clientX-r.left)/r.width*JOURNEY.length))));
+};
+/* no celular, arrastar a caixa para os lados avança ou volta */
+let swipeX=null;
+narr.addEventListener("touchstart",e=>{ swipeX=e.touches[0].clientX; },{passive:true});
+narr.addEventListener("touchend",e=>{
+  if(swipeX===null) return; const dx=e.changedTouches[0].clientX-swipeX; swipeX=null;
+  if(dx<-40&&jr.i<LAST) jump(jr.i+1); else if(dx>40&&jr.i>0) jump(jr.i-1);
+},{passive:true});
 nPause.onclick=()=>{
   if(jr.done){setPaused(false); showStep(0); return;}
   if(jr.paused){
@@ -325,7 +399,19 @@ nPause.onclick=()=>{
     if(jr.i<LAST) showStep(jr.i+1); else finish();
   }else{setPaused(true); clearTimers();}
 };
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!search.open&&!zv.open){if(jr.on)stopJourney();else if(fail.on)exitFail();else if(state.sel)closePanel();}});
+document.addEventListener("keydown",e=>{
+  if(search.open||zv.open) return;
+  if(e.key==="Escape"){
+    if(moreViews.classList.contains("open")) setMore(false);
+    else if(jr.on) stopJourney(); else if(fail.on) exitFail(); else if(state.sel) closePanel();
+    return;
+  }
+  /* setas navegam pela jornada, fora de campos e selects */
+  if(jr.on&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){
+    if(e.key==="ArrowRight"){ e.preventDefault(); if(jr.i<LAST) jump(jr.i+1); }
+    else if(e.key==="ArrowLeft"){ e.preventDefault(); if(jr.i>0) jump(jr.i-1); }
+  }
+});
 
 /* ---------- busca (⌘K, Ctrl+K ou /) ---------- */
 const search=document.getElementById("search"), q=document.getElementById("q"), results=document.getElementById("results");
@@ -451,7 +537,8 @@ function redSwitch(){
   return `<button class="switch f-red" aria-pressed="${fail.red}"><i aria-hidden="true"></i>Com redundância</button>`;
 }
 function bindRed(){
-  panel.querySelector(".f-red").onclick=()=>{fail.red=!fail.red; fail.root?breakNode(fail.root):failIntro();};
+  const sw=panel.querySelector(".f-red");
+  if(sw) sw.onclick=()=>{fail.red=!fail.red; fail.root?breakNode(fail.root):failIntro();};
 }
 function failIntro(){
   panel.className="panel open";
@@ -468,6 +555,7 @@ function failIntro(){
   bindRed(); panel.scrollTop=0;
 }
 function breakNode(id){
+  markSeen();
   if(!fail.on) enterFail();
   clearFailMarks(); fail.root=id; setHash("falha-"+id);
   const r=STRATA.simulateFailure(STYLE,id,fail.red);
@@ -506,9 +594,8 @@ function failReport(id,r){
    <h3>${v.n} caiu</h3>
    <div class="f-verdict f-u-${r.user}">${F_USER[r.user]}</div>
    ${compare}
-   ${redSwitch()}
-   ${g?(fail.red?`<div class="f-guard"><b>Quem segura:</b> ${g[1]}</div>`:`<p class="f-note">Sem redundância, nada segura a queda. Ligue a chave para ver como a produção se protege.</p>`)
-      :`<p class="f-note">Aqui a redundância não evita a queda: o cenário é a peça inteira fora do ar.</p>`}
+   ${g?redSwitch()+(fail.red?`<div class="f-guard"><b>Quem segura:</b> ${g[1]}</div>`:`<p class="f-note">Sem redundância, nada segura a queda. Ligue a chave para ver como a produção se protege.</p>`)
+      :`<p class="f-note">Esta peça não tem réplica nem desvio que segure a queda: o cenário é ela inteira fora do ar.</p>`}
    <h4>O que acontece</h4><div class="fail">${v.fail}</div>
    ${groups||`<p class="f-note">Nenhuma outra peça é afetada.</p>`}
    ${res&&!g?`<h4>Como se proteger</h4><div class="axnote res"><b>Resiliência:</b> ${res}</div>`:""}
@@ -670,11 +757,12 @@ function fromHash(){
   const zm=id.match(/^zoom-([a-z][a-z0-9]*)((?:-\d+){0,2})$/);
   if(zm){
     const path=[zm[1],...zm[2].split("-").filter(Boolean).map(Number)];
-    if(validPath(path)){ if(state.sel!==path[0]) goTo(path[0]); openZoom(path); }
+    if(validPath(path)){ if(fail.on) exitFail(); if(state.sel!==path[0]) goTo(path[0]); openZoom(path); }
     return;
   }
   if(id.startsWith("falha-")&&N[id.slice(6)]&&STYLE.failure) breakNode(id.slice(6));
-  else if(N[id]&&state.sel!==id) goTo(id);
+  /* link de uma peça com o modo falha ligado: sai do modo antes, para não misturar as marcas da queda */
+  else if(N[id]&&(state.sel!==id||fail.on)){ if(fail.on) exitFail(); goTo(id); }
 }
 window.addEventListener("hashchange",fromHash);
 

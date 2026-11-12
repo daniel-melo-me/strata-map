@@ -135,9 +135,10 @@ python3 -m http.server 8000
 
 Cada peça tem link direto: `index.html#pedidos` abre o mapa já com o serviço de pedidos aberto.
 
-Antes de publicar uma mudança no conteúdo, valide as referências (o GitHub também roda isso a cada push):
+Antes de publicar uma mudança, versione os arquivos e valide as referências (o GitHub também valida a cada push):
 
 ```bash
+node tools/versionar.js   # põe ?v=<hash> nos arquivos do index.html, para o cache não misturar versões
 node tests/validate.js
 ```
 
@@ -159,6 +160,7 @@ assets/js/app.js               render do mapa, painel, filtros, jornada e modo f
 assets/img/                    favicon, ícone para iOS e imagem de prévia (og.png)
 tools/og-image.html            fonte da imagem de prévia; o comando para regenerar está no arquivo
 tests/validate.js              valida peças, conexões, jornadas, modo falha, zoom, busca e arquivos citados
+tools/versionar.js             versiona os arquivos citados no index.html pelo conteúdo
 .github/workflows/validar.yml  roda a validação a cada push e pull request
 ```
 

@@ -32,7 +32,7 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/styles.css?v=021eb54bd3">
+<link rel="stylesheet" href="assets/css/styles.css?v=1d809e208c">
 </head>
 <body>
 <header class="top">
@@ -57,7 +57,8 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
       <b>Strata Map</b>
     </a>
     <div class="top-tools">
-      <label class="style-pill"><span>Estilo arquitetural</span><select id="styleSel"></select></label>
+      <label class="style-pill" title="O mesmo sistema montado de três jeitos: monólito, microsserviços e serverless. Troque e compare o que muda."><span>Estilo arquitetural</span><select id="styleSel" aria-describedby="styleHelp"></select></label>
+      <span class="sr-only" id="styleHelp">O mesmo sistema montado de três jeitos: monólito, microsserviços e serverless.</span>
       <div class="theme-switch" id="themeSwitch" role="radiogroup" aria-label="Tema">
         <button role="radio" data-theme-opt="system" aria-label="Tema do sistema" title="Tema do sistema"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5.5 14h5M8 11.5V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
         <button role="radio" data-theme-opt="light" aria-label="Tema claro" title="Tema claro"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.05 3.05l1.13 1.13M11.82 11.82l1.13 1.13M3.05 12.95l1.13-1.13M11.82 4.18l1.13-1.13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
@@ -70,6 +71,10 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
       <p class="eyebrow">O software por inteiro, do clique à infraestrutura física</p>
       <h1>A jornada de um clique</h1>
       <p class="lede">Um corte do software inteiro, da tela que você toca até os cabos, ondas e satélites que carregam tudo. Toque numa peça para abrir por dentro, ou dispare um clique e acompanhe a viagem.</p>
+      <ul class="paths">
+        <li><b>Novo em tecnologia?</b> Dispare um clique e acompanhe a viagem, camada por camada.</li>
+        <li><b>Já trabalha na área?</b> Abra as peças, veja pelos olhos de cada papel e derrube peças no Modo falha.</li>
+      </ul>
       <div class="cta">
         <button class="btn-main" data-play><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg>Disparar um clique</button>
         <a class="btn-ghost" href="#mapa">Explorar o mapa<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -89,22 +94,28 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 
 <div class="controls">
   <button class="btn-mini" data-play aria-label="Disparar um clique"><svg width="12" height="12" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z" fill="currentColor"/></svg><span>Disparar</span></button>
-  <button class="btn-search" id="searchBtn" aria-haspopup="dialog"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Buscar</span><kbd id="searchKbd">⌘K</kbd></button>
-  <span class="sep" aria-hidden="true"></span>
-  <div class="seg-group" id="axes" role="group" aria-label="Eixos que atravessam tudo">
-    <button class="chip ax-seg" data-ax="seg" aria-pressed="false"><i></i>Segurança</button>
-    <button class="chip ax-obs" data-ax="obs" aria-pressed="false"><i></i>Observabilidade</button>
-    <button class="chip ax-res" data-ax="res" aria-pressed="false"><i></i>Resiliência</button>
-  </div>
-  <span class="sep" aria-hidden="true"></span>
-  <button class="switch" id="runs" aria-pressed="false"><i aria-hidden="true"></i>Onde cada coisa roda</button>
-  <span class="sep" aria-hidden="true"></span>
-  <button class="chip fail-chip" id="failBtn" aria-pressed="false"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2 1 3 8h3.6L5.8 13 11 6H7.4z" fill="currentColor"/></svg>Modo falha</button>
+  <button class="btn-search" id="searchBtn" aria-haspopup="dialog" aria-label="Buscar"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Buscar</span><kbd id="searchKbd">⌘K</kbd></button>
   <span class="sep" aria-hidden="true"></span>
   <label class="select">
-    <span>Ver pelos olhos de</span>
-    <select id="personas"><option value="">Todas as pessoas</option></select>
+    <span class="select-txt">Ver pelos olhos de</span>
+    <svg class="select-ico" width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="5" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 14.5c.8-3 3-4.5 5.5-4.5s4.7 1.5 5.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <select id="personas" aria-label="Ver pelos olhos de"><option value="">Todas as pessoas</option></select>
   </label>
+  <button class="chip fail-chip" id="failBtn" aria-pressed="false"><svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.2 1 3 8h3.6L5.8 13 11 6H7.4z" fill="currentColor"/></svg><span>Modo falha</span></button>
+  <span class="sep" aria-hidden="true"></span>
+  <!-- em telas largas os eixos ficam na barra; em telas menores, num menu -->
+  <button class="chip more-btn" id="moreBtn" aria-expanded="false" aria-controls="moreViews"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Mais visões</span><i class="more-dot" aria-hidden="true"></i></button>
+  <div class="more-views" id="moreViews">
+    <p class="mv-title">Eixos que atravessam tudo</p>
+    <div class="seg-group" id="axes" role="group" aria-label="Eixos que atravessam tudo">
+      <button class="chip ax-seg" data-ax="seg" aria-pressed="false"><i></i>Segurança</button>
+      <button class="chip ax-obs" data-ax="obs" aria-pressed="false"><i></i>Observabilidade</button>
+      <button class="chip ax-res" data-ax="res" aria-pressed="false"><i></i>Resiliência</button>
+    </div>
+    <span class="sep" aria-hidden="true"></span>
+    <p class="mv-title">Profundidade</p>
+    <button class="switch" id="runs" aria-pressed="false"><i aria-hidden="true"></i>Onde cada coisa roda</button>
+  </div>
 </div>
 <div class="banner" id="banner"></div>
 <p class="persona-line" id="personaLine"></p>
@@ -185,13 +196,14 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 
 <div class="narr" id="narr" role="status">
   <div class="meta"><span id="nStep"></span><span id="nMs"></span></div>
-  <div class="bar"><i id="nBar"></i></div>
+  <div class="bar" id="nBarWrap" title="Clique para pular para esse ponto da jornada"><i id="nBar"></i></div>
   <p id="nText"></p>
   <div class="row">
     <button id="nPrev">Voltar</button>
     <button id="nPause">Pausar</button>
     <button id="nNext">Avançar</button>
     <button id="nStop">Fechar</button>
+    <span class="keys" aria-hidden="true">← → navegam</span>
   </div>
 </div>
 
@@ -202,6 +214,6 @@ try{var t=localStorage.getItem("strata-theme");if(t==="light"||t==="dark")docume
 <script src="assets/js/data/zoom.js?v=bf6a3f8425"></script>
 <script src="assets/js/failure.js?v=c225668f3c"></script>
 <script src="assets/js/search.js?v=a919bf47f3"></script>
-<script src="assets/js/app.js?v=9fe6c60c9e"></script>
+<script src="assets/js/app.js?v=9a89cb2313"></script>
 </body>
 </html>
